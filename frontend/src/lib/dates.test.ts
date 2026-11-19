@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {daysInclusive, monthsInRange, presets, toIsoDate} from './dates'
+import {daysInclusive, formatDateEs, monthsInRange, presets, toIsoDate} from './dates'
 
 describe('presets', () => {
   it('calcula los tres presets desde hoy', () => {
@@ -35,5 +35,12 @@ describe('toIsoDate', () => {
   it('toIsoDate uses local date', () => {
     expect(toIsoDate(new Date(2026, 10, 30, 23, 30))).toBe('2026-11-30')
     expect(toIsoDate(new Date(2026, 0, 1, 0, 5))).toBe('2026-01-01')
+  })
+})
+
+describe('formatDateEs', () => {
+  it('muestra dd/mm/aaaa', () => {
+    expect(formatDateEs('2026-08-01')).toBe('01/08/2026')
+    expect(formatDateEs('')).toBe('')
   })
 })

@@ -3,7 +3,7 @@ import {ReactElement} from 'react'
 
 export type IconName =
   | 'download' | 'minimize' | 'maximize' | 'close' | 'refresh' | 'chevronDown' | 'chevronRight'
-  | 'mail' | 'database' | 'check' | 'alert' | 'folder' | 'file' | 'stop' | 'x'
+  | 'mail' | 'database' | 'check' | 'alert' | 'folder' | 'file' | 'stop' | 'x' | 'lock'
 
 const paths: Record<IconName, {viewBox: string; body: ReactElement; fill?: boolean}> = {
   download: {viewBox: '0 0 24 24', body: <><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></>},
@@ -19,7 +19,8 @@ const paths: Record<IconName, {viewBox: string; body: ReactElement; fill?: boole
   alert: {viewBox: '0 0 24 24', body: <><path d="M12 8v5"/><path d="M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></>},
   folder: {viewBox: '0 0 24 24', body: <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>},
   file: {viewBox: '0 0 24 24', body: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></>},
-  stop: {viewBox: '0 0 24 24', body: <rect x="6" y="6" width="12" height="12" rx="1.5"/>},
+  stop: {viewBox: '0 0 24 24', body: <rect x="5" y="5" width="14" height="14" rx="2"/>, fill: true},
+  lock: {viewBox: '0 0 24 24', body: <><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></>},
   x: {viewBox: '0 0 24 24', body: <path d="M6 6l12 12M18 6 6 18"/>},
 }
 
@@ -33,7 +34,7 @@ interface Props {
 export function Icon({name, size = 14, strokeWidth = 2, className}: Props) {
   const p = paths[name]
   return (
-    <svg width={size} height={size} viewBox={p.viewBox} fill="none" stroke="currentColor"
+    <svg width={size} height={size} viewBox={p.viewBox} fill={p.fill ? 'currentColor' : 'none'} stroke={p.fill ? 'none' : 'currentColor'}
          strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={className}>
       {p.body}
     </svg>
