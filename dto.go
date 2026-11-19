@@ -13,6 +13,9 @@ import (
 
 const dateLayout = "2006-01-02"
 
+// appVersion es la versión que muestra la barra de título.
+const appVersion = "0.1.0"
+
 // JobRequestDTO es la solicitud tal como llega desde el frontend (fechas como texto).
 type JobRequestDTO struct {
 	Folder            domain.FolderRef `json:"folder"`
@@ -29,8 +32,9 @@ type JobRequestDTO struct {
 
 // SourceInfo dice a la UI qué fuente de correos está activa.
 type SourceInfo struct {
-	Name string `json:"name"`
-	Demo bool   `json:"demo"`
+	Name    string `json:"name"`
+	Demo    bool   `json:"demo"`
+	Version string `json:"version"`
 }
 
 func parseDate(s string) (time.Time, error) {

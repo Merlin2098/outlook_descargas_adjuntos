@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"os"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -26,7 +28,9 @@ type App struct {
 	jobs      *jobs.Manager
 	log       *slog.Logger
 	configDir string
-	cfg       config.Config
+
+	mu  sync.Mutex // protege cfg: Wails llama a los bindings desde varios goroutines
+	cfg config.Config
 }
 
 // wailsEmitter publica los eventos del gestor de jobs en el runtime de Wails.
@@ -67,9 +71,9 @@ var errNoSource = errors.New("No hay una fuente de correos disponible") //nolint
 // SourceInfo indica qué fuente está activa ("demo", "outlook" o "ninguna").
 func (a *App) SourceInfo() SourceInfo {
 	if a.src == nil {
-		return SourceInfo{Name: "ninguna"}
+		return SourceInfo{Name: "ninguna", Version: appVersion}
 	}
-	return SourceInfo{Name: a.src.Name(), Demo: a.src.Name() == "demo"}
+	return SourceInfo{Name: a.src.Name(), Demo: a.src.Name() == "demo", Version: appVersion}
 }
 
 // ListRoots devuelve las cuentas o stores de la fuente.
@@ -90,9 +94,12 @@ func (a *App) ListChildren(ref domain.FolderRef) ([]domain.Folder, error) {
 
 // PickDirectory abre el diálogo nativo para elegir la carpeta de destino.
 func (a *App) PickDirectory() (string, error) {
+	a.mu.Lock()
+	last := a.cfg.LastDestDir
+	a.mu.Unlock()
 	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
 		Title:            "Carpeta de destino",
-		DefaultDirectory: a.cfg.LastDestDir,
+		DefaultDirectory: last,
 	})
 }
 
@@ -105,11 +112,26 @@ func (a *App) StartJob(req JobRequestDTO) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	a.cfg.LastDestDir = r.DestDir
-	if err := config.Save(a.configDir, a.cfg); err != nil {
+	id, err := a.jobs.Start(r)
+	if err != nil {
+		return "", err
+	}
+	a.mu.Lock()
+	a.cfg.LastDestDir, a.cfg.Organize, a.cfg.SkipInline = r.DestDir, r.Organize, r.Filters.SkipInline
+	cfg := a.cfg
+	a.mu.Unlock()
+	if err := config.Save(a.configDir, cfg); err != nil {
 		a.log.Warn("no se pudo guardar la config", "error", err)
 	}
-	return a.jobs.Start(r)
+	return id, nil
+}
+
+// GetJobStatus devuelve el estado del job en curso o del último (la UI lo usa al recargar).
+func (a *App) GetJobStatus() jobs.Status {
+	if a.jobs == nil {
+		return jobs.Status{}
+	}
+	return a.jobs.Status()
 }
 
 // CancelJob cancela la descarga en curso.
@@ -120,16 +142,50 @@ func (a *App) CancelJob(jobID string) error {
 	return a.jobs.Cancel(jobID)
 }
 
-// OpenPath abre una carpeta o un archivo con el Explorador de Windows.
-func (a *App) OpenPath(path string) error {
+// openTarget elige qué ruta del último job abrir: el reporte o la carpeta de destino.
+// Solo se abren rutas que produjo un job y que existen en disco.
+func openTarget(st jobs.Status, report bool) (string, error) {
+	path, errNone := st.DestDir, domain.ErrNothingToOpen
+	if report {
+		path, errNone = "", domain.ErrNoReport
+		if st.Last != nil {
+			path = st.Last.ReportPath
+		}
+	}
+	if path == "" {
+		return "", errNone
+	}
+	if _, err := os.Stat(path); err != nil {
+		return "", errNone
+	}
+	return path, nil
+}
+
+func (a *App) open(report bool) error {
+	path, err := openTarget(a.GetJobStatus(), report)
+	if err != nil {
+		return err
+	}
 	return exec.Command("explorer", path).Start()
 }
 
+// OpenDestination abre en el Explorador la carpeta de destino del último job.
+func (a *App) OpenDestination() error { return a.open(false) }
+
+// OpenReport abre el reporte Excel del último job.
+func (a *App) OpenReport() error { return a.open(true) }
+
 // GetConfig devuelve las preferencias actuales.
-func (a *App) GetConfig() config.Config { return a.cfg }
+func (a *App) GetConfig() config.Config {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.cfg
+}
 
 // SaveConfig guarda las preferencias.
 func (a *App) SaveConfig(c config.Config) error {
+	a.mu.Lock()
 	a.cfg = c
+	a.mu.Unlock()
 	return config.Save(a.configDir, c)
 }

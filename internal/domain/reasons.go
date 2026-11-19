@@ -26,4 +26,6 @@ var (
 	ErrDestNotWritable = errors.New("No se puede escribir en la carpeta de destino")
 	ErrBadRange        = errors.New("La fecha de inicio es posterior a la fecha fin")
 	ErrDestTooLong     = errors.New("La ruta de la carpeta de destino es demasiado larga")
+	ErrNothingToOpen   = errors.New("No hay una carpeta de destino que abrir")
+	ErrNoReport        = errors.New("No hay un reporte que abrir")
 )

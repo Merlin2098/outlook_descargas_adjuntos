@@ -53,6 +53,7 @@ func main() {
 		Height:    cfg.WindowHeight,
 		MinWidth:  1100,
 		MinHeight: 680,
+		Frameless: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

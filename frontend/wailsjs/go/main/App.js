@@ -10,6 +10,10 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
+export function GetJobStatus() {
+  return window['go']['main']['App']['GetJobStatus']();
+}
+
 export function ListChildren(arg1) {
   return window['go']['main']['App']['ListChildren'](arg1);
 }
@@ -18,8 +22,12 @@ export function ListRoots() {
   return window['go']['main']['App']['ListRoots']();
 }
 
-export function OpenPath(arg1) {
-  return window['go']['main']['App']['OpenPath'](arg1);
+export function OpenDestination() {
+  return window['go']['main']['App']['OpenDestination']();
+}
+
+export function OpenReport() {
+  return window['go']['main']['App']['OpenReport']();
 }
 
 export function PickDirectory() {
