@@ -322,3 +322,55 @@ func TestRunCancelRecordsPending(t *testing.T) {
 		t.Fatalf("guardados+errores+pendientes = %d, want %d (pendientes=%d)", got, totalEligible, pending)
 	}
 }
+
+func sumMap(m map[string]int) int {
+	n := 0
+	for _, v := range m {
+		n += v
+	}
+	return n
+}
+
+func TestRunSummaryBreakdown(t *testing.T) {
+	src := demoSource()
+	req := baseReq(t, folderRef(t, src, "Facturas proveedores"))
+	req.Organize = domain.OrganizeByMonth
+	res, err := Run(context.Background(), src, req, &captureSink{}, fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := res.Summary
+	if got := sumMap(s.BySubfolder); got != s.Saved {
+		t.Fatalf("suma BySubfolder = %d, Saved = %d", got, s.Saved)
+	}
+	month := regexp.MustCompile(`^\d{4}-\d{2}$`)
+	for k := range s.BySubfolder {
+		if !month.MatchString(k) {
+			t.Fatalf("clave de subcarpeta inesperada %q", k)
+		}
+	}
+	for _, r := range []string{"Adjunto bloqueado por Outlook", "Error de E/S simulado"} {
+		if s.ErrorReasons[r] != 1 {
+			t.Errorf("ErrorReasons[%q] = %d, want 1", r, s.ErrorReasons[r])
+		}
+		if _, ok := s.Reasons[r]; ok {
+			t.Errorf("Reasons contiene el error %q", r)
+		}
+	}
+	if got := sumMap(s.Reasons); got != s.Skipped {
+		t.Fatalf("suma Reasons = %d, Skipped = %d", got, s.Skipped)
+	}
+}
+
+func TestRunSummaryFlat(t *testing.T) {
+	src := demoSource()
+	req := baseReq(t, folderRef(t, src, "Facturas proveedores"))
+	res, err := Run(context.Background(), src, req, &captureSink{}, fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := res.Summary
+	if len(s.BySubfolder) != 1 || s.BySubfolder[""] != s.Saved {
+		t.Fatalf("BySubfolder = %v, Saved = %d", s.BySubfolder, s.Saved)
+	}
+}

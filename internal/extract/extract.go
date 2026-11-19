@@ -101,7 +101,8 @@ func Run(ctx context.Context, src source.MailSource, req domain.JobRequest, sink
 		return Result{}, err
 	}
 	r := &runner{src: src, req: req, sink: sink, now: now}
-	r.sum = domain.Summary{Started: now(), ByExt: map[string]int{}, Reasons: map[string]int{}}
+	r.sum = domain.Summary{Started: now(), ByExt: map[string]int{}, Reasons: map[string]int{},
+		ErrorReasons: map[string]int{}, BySubfolder: map[string]int{}}
 	r.start, r.end = dayBounds(req.Filters)
 	r.emit(PhaseConnecting)
 
@@ -147,11 +148,10 @@ func (r *runner) record(rec domain.RunRecord) {
 	switch rec.Status {
 	case domain.StatusSkipped:
 		r.sum.Skipped++
+		r.sum.Reasons[rec.Reason]++
 	case domain.StatusError:
 		r.sum.Errors++
-	}
-	if rec.Reason != "" {
-		r.sum.Reasons[rec.Reason]++
+		r.sum.ErrorReasons[rec.Reason]++
 	}
 }
 
@@ -318,6 +318,7 @@ func (r *runner) saveOne(ctx context.Context, c candidate, a domain.Attachment) 
 	r.sum.Saved++
 	r.sum.Bytes += st.Size()
 	r.sum.ByExt[strings.ToLower(filepath.Ext(final))]++
+	r.sum.BySubfolder[subdir]++
 	kind := ActSaved
 	if final != name {
 		kind = ActRenamed

@@ -109,7 +109,9 @@ type Summary struct {
 	Errors             int            `json:"errors"`
 	Bytes              int64          `json:"bytes"`
 	ByExt              map[string]int `json:"byExt"`
-	Reasons            map[string]int `json:"reasons"`
+	Reasons            map[string]int `json:"reasons"`      // motivos de los omitidos
+	ErrorReasons       map[string]int `json:"errorReasons"` // motivos de los errores
+	BySubfolder        map[string]int `json:"bySubfolder"`  // archivos guardados por subcarpeta ("" en modo plano)
 	Started            time.Time      `json:"started"`
 	Finished           time.Time      `json:"finished"`
 	Cancelled          bool           `json:"cancelled"`
