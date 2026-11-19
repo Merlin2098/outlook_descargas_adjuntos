@@ -56,6 +56,55 @@ type Manager struct {
 	id     string
 	cancel context.CancelFunc
 	done   chan struct{} // se cierra después del evento terminal del último job
+
+	// Estado consultable con Status (protegido por mu).
+	statusID string
+	dest     string
+	prog     extract.Progress
+	recent   []extract.Activity
+	last     *Terminal
+}
+
+// RecentMax es cuántas actividades recientes conserva Status.
+const RecentMax = 100
+
+// Status es la foto del job que la UI consulta con GetJobStatus (por ejemplo, tras recargar).
+type Status struct {
+	JobID    string             `json:"jobId"` // job en curso, o el último terminado
+	Running  bool               `json:"running"`
+	DestDir  string             `json:"destDir"`  // destino del job en curso o del último
+	Progress extract.Progress   `json:"progress"` // último progreso publicado
+	Recent   []extract.Activity `json:"recent"`   // últimas RecentMax actividades, la más antigua primero
+	Last     *Terminal          `json:"last"`     // terminal del último job terminado; nil si no hay
+}
+
+// Status devuelve una copia del estado actual.
+func (m *Manager) Status() Status {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	st := Status{JobID: m.statusID, Running: m.cancel != nil, DestDir: m.dest, Progress: m.prog,
+		Recent: append([]extract.Activity(nil), m.recent...)}
+	if m.last != nil {
+		t := *m.last
+		st.Last = &t
+	}
+	return st
+}
+
+// published guarda lo que el sink acaba de publicar para el job id.
+func (m *Manager) published(id string, prog *extract.Progress, acts []extract.Activity) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if id != m.statusID {
+		return
+	}
+	if prog != nil {
+		m.prog = *prog
+	}
+	m.recent = append(m.recent, acts...)
+	if n := len(m.recent); n > RecentMax {
+		m.recent = append([]extract.Activity(nil), m.recent[n-RecentMax:]...)
+	}
 }
 
 // NewManager crea el gestor. interval es el mínimo entre eventos de progreso y de actividad.
@@ -79,6 +128,7 @@ func (m *Manager) Start(req domain.JobRequest) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
 	m.id, m.cancel, m.done = id, cancel, done
+	m.statusID, m.dest, m.prog, m.recent = id, req.DestDir, extract.Progress{}, nil
 	go m.run(ctx, id, req, done)
 	return id, nil
 }
@@ -110,18 +160,22 @@ func (m *Manager) Running() bool {
 	return m.cancel != nil
 }
 
-func (m *Manager) finish() {
+// finish libera el gestor y guarda el terminal del job, antes de emitirlo.
+func (m *Manager) finish(term Terminal) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.cancel != nil {
 		m.cancel()
 	}
 	m.id, m.cancel = "", nil
+	m.last = &term
 }
 
 func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest, done chan struct{}) {
 	defer close(done)
-	sink := newThrottledSink(m.em, m.interval)
+	sink := newThrottledSink(m.em, m.interval, func(p *extract.Progress, acts []extract.Activity) {
+		m.published(id, p, acts)
+	})
 	log := m.log.With("job", id)
 	log.Info("job iniciado", "carpeta", req.Folder.Path, "destino", req.DestDir)
 
@@ -137,21 +191,22 @@ func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest, don
 	}()
 
 	sink.close()
-	m.finish()
 
 	term := Terminal{JobID: id, Summary: res.Summary, ReportPath: res.ReportPath}
+	event := EventDone
 	switch {
 	case err == nil:
 		log.Info("job terminado", "guardados", res.Summary.Saved, "errores", res.Summary.Errors)
-		m.em.Emit(EventDone, term)
 	case errors.Is(err, context.Canceled):
+		event = EventCancelled
 		log.Info("job cancelado", "guardados", res.Summary.Saved)
-		m.em.Emit(EventCancelled, term)
 	default:
+		event = EventError
 		term.Message = err.Error()
 		log.Error("job con error", "error", err)
-		m.em.Emit(EventError, term)
 	}
+	m.finish(term)
+	m.em.Emit(event, term)
 }
 
 func newID() string {
@@ -163,6 +218,7 @@ func newID() string {
 // throttledSink acumula progreso y actividad y los publica como mucho una vez por intervalo.
 type throttledSink struct {
 	em     Emitter
+	onPub  func(*extract.Progress, []extract.Activity)
 	mu     sync.Mutex
 	last   extract.Progress
 	dirty  bool
@@ -172,8 +228,9 @@ type throttledSink struct {
 	ticker *time.Ticker
 }
 
-func newThrottledSink(em Emitter, interval time.Duration) *throttledSink {
-	s := &throttledSink{em: em, stop: make(chan struct{}), done: make(chan struct{}), ticker: time.NewTicker(interval)}
+// onPub (opcional) recibe lo publicado en cada flush; prog es nil si no hubo progreso nuevo.
+func newThrottledSink(em Emitter, interval time.Duration, onPub func(*extract.Progress, []extract.Activity)) *throttledSink {
+	s := &throttledSink{em: em, onPub: onPub, stop: make(chan struct{}), done: make(chan struct{}), ticker: time.NewTicker(interval)}
 	go func() {
 		defer close(s.done)
 		for {
@@ -212,6 +269,13 @@ func (s *throttledSink) flush() {
 	}
 	if dirty {
 		s.em.Emit(EventProgress, prog)
+	}
+	if s.onPub != nil && (dirty || len(acts) > 0) {
+		var p *extract.Progress
+		if dirty {
+			p = &prog
+		}
+		s.onPub(p, acts)
 	}
 }
 
