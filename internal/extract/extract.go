@@ -84,16 +84,16 @@ type candidate struct {
 }
 
 type runner struct {
-	src     source.MailSource
-	req     domain.JobRequest
-	sink    Sink
-	now     func() time.Time
-	sum     domain.Summary
-	recs    []domain.RunRecord
-	prog    Progress
-	start   time.Time
-	end     time.Time
-	cands   []candidate
+	src   source.MailSource
+	req   domain.JobRequest
+	sink  Sink
+	now   func() time.Time
+	sum   domain.Summary
+	recs  []domain.RunRecord
+	prog  Progress
+	start time.Time
+	end   time.Time
+	cands []candidate
 }
 
 // Run ejecuta la descarga completa. Si ctx se cancela, escribe el reporte parcial y devuelve ctx.Err().
