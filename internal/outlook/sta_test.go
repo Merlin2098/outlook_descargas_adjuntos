@@ -223,3 +223,66 @@ func TestComHelpersReleaseAll(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// doWithin falla el test si una llamada al STA no vuelve en 1 s (el STA quedó ocupado).
+func doWithin(t *testing.T, s *sta) error {
+	t.Helper()
+	ok := make(chan error, 1)
+	go func() { ok <- s.do(context.Background(), func() error { return nil }) }()
+	select {
+	case err := <-ok:
+		return err
+	case <-time.After(time.Second):
+		t.Fatal("el STA quedó ocupado")
+		return nil
+	}
+}
+
+func TestStreamAfterClose(t *testing.T) {
+	s, err := newSTA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.close()
+	done := make(chan error, 1)
+	go func() {
+		done <- stream(context.Background(), s, func(yield func(int) bool) error {
+			yield(1)
+			return nil
+		}, func(int) error { return nil })
+	}()
+	select {
+	case err := <-done:
+		if !errors.Is(err, errSTAClosed) {
+			t.Fatalf("stream = %v, want errSTAClosed", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("stream se colgó con el STA cerrado")
+	}
+}
+
+func TestStreamFnPanic(t *testing.T) {
+	s := newTestSTA(t)
+	func() {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("se esperaba el panic de fn")
+			}
+		}()
+		_ = stream(context.Background(), s, func(yield func(int) bool) error {
+			for i := 0; ; i++ {
+				if !yield(i) {
+					return nil
+				}
+			}
+		}, func(v int) error {
+			if v == 3 {
+				panic("fn-boom")
+			}
+			return nil
+		})
+	}()
+	if err := doWithin(t, s); err != nil {
+		t.Fatal(err)
+	}
+}

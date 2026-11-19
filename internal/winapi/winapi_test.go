@@ -59,3 +59,9 @@ func TestOpenPathMissing(t *testing.T) {
 		t.Fatal("OpenPath de una ruta inexistente no devolvió error")
 	}
 }
+
+func TestFindOwnWindowMissing(t *testing.T) {
+	if h := FindOwnWindow("título-que-no-existe-123"); h != 0 {
+		t.Fatalf("FindOwnWindow = %#x, want 0", h)
+	}
+}

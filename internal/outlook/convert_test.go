@@ -161,3 +161,13 @@ func TestSenderAddress(t *testing.T) {
 		}
 	}
 }
+
+func TestComError(t *testing.T) {
+	err := comError("listar carpetas", io.EOF)
+	if !strings.Contains(err.Error(), "Outlook devolvió un error al listar carpetas") {
+		t.Fatalf("mensaje = %q", err)
+	}
+	if !errors.Is(err, io.EOF) {
+		t.Fatal("comError no envuelve el error original")
+	}
+}

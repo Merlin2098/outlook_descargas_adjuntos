@@ -128,6 +128,15 @@ func (s *Source) checkConn(err error) error {
 	return err
 }
 
+// fail aplica checkConn y, si el error no es de desconexión, le da contexto en español con comError.
+func (s *Source) fail(op string, err error) error {
+	err = s.checkConn(err)
+	if err == nil || errors.Is(err, domain.ErrOutlookUnavailable) {
+		return err
+	}
+	return comError(op, err)
+}
+
 // ListRoots implementa source.MailSource: las cuentas y archivos de datos (PST) del perfil.
 func (s *Source) ListRoots(ctx context.Context) ([]domain.Folder, error) {
 	var out []domain.Folder
@@ -138,11 +147,11 @@ func (s *Source) ListRoots(ctx context.Context) ([]domain.Folder, error) {
 		}
 		roots, err := getObj(ns, "Folders")
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("listar las cuentas", err)
 		}
 		defer release(roots)
 		out, err = listFolders(roots)
-		return s.checkConn(err)
+		return s.fail("listar las cuentas", err)
 	})
 	return out, err
 }
@@ -153,16 +162,16 @@ func (s *Source) ListChildren(ctx context.Context, ref domain.FolderRef) ([]doma
 	err := s.sta.do(ctx, func() error {
 		f, err := s.folder(ref)
 		if err != nil {
-			return err
+			return s.fail("abrir la carpeta "+ref.Path, err)
 		}
 		defer release(f)
 		kids, err := getObj(f, "Folders")
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("listar las subcarpetas", err)
 		}
 		defer release(kids)
 		out, err = listFolders(kids)
-		return s.checkConn(err)
+		return s.fail("listar las subcarpetas", err)
 	})
 	return out, err
 }
@@ -174,7 +183,7 @@ func (s *Source) folder(ref domain.FolderRef) (*ole.IDispatch, error) {
 	}
 	f, err := callObj(ns, "GetFolderFromID", ref.EntryID, ref.StoreID)
 	if err != nil {
-		return nil, s.checkConn(fmt.Errorf("abrir carpeta %s: %w", ref.Path, err))
+		return nil, err
 	}
 	return f, nil
 }
@@ -240,16 +249,16 @@ func (s *Source) Scan(ctx context.Context, ref domain.FolderRef, fn func(source.
 	return stream(ctx, s.sta, func(yield func(source.ScanItem) bool) error {
 		f, err := s.folder(ref)
 		if err != nil {
-			return err
+			return s.fail("abrir la carpeta "+ref.Path, err)
 		}
 		defer release(f)
 		items, err := getObj(f, "Items")
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("recorrer la carpeta", err)
 		}
 		defer release(items)
 		if err := call(items, "Sort", "[ReceivedTime]", true); err != nil {
-			return s.checkConn(err)
+			return s.fail("recorrer la carpeta", err)
 		}
 		it, err := callMaybeObj(items, "GetFirst")
 		for err == nil && it != nil {
@@ -260,7 +269,7 @@ func (s *Source) Scan(ctx context.Context, ref domain.FolderRef, fn func(source.
 			}
 			it, err = callMaybeObj(items, "GetNext")
 		}
-		return s.checkConn(err)
+		return s.fail("recorrer la carpeta", err)
 	}, fn)
 }
 
@@ -293,7 +302,7 @@ func (s *Source) readItem(it *ole.IDispatch, storeID string) source.ScanItem {
 		return source.ScanItem{Mail: m, Err: s.checkConn(err)}
 	}
 	if m.EntryID != "" {
-		s.stores[m.EntryID] = storeID
+		s.rememberStore(m.EntryID, storeID)
 	}
 	return source.ScanItem{Mail: m}
 }
@@ -424,6 +433,18 @@ func callMaybeObj(d *ole.IDispatch, method string) (*ole.IDispatch, error) {
 	return dispatchOf(v, method)
 }
 
+// storesMax acota el mapa EntryID → StoreID en carpetas enormes o en sesiones largas.
+const storesMax = 100_000
+
+// rememberStore anota el StoreID de un correo. Al superar storesMax vacía el mapa: GetItemFromID
+// funciona sin StoreID, solo más lento.
+func (s *Source) rememberStore(entryID, storeID string) {
+	if len(s.stores) >= storesMax {
+		clear(s.stores)
+	}
+	s.stores[entryID] = storeID
+}
+
 // SaveAttachment implementa source.MailSource: relee el correo por EntryID (y su StoreID, si se
 // conoce del Scan) y guarda el adjunto index en destPath.
 func (s *Source) SaveAttachment(ctx context.Context, mailEntryID string, index int, destPath string) error {
@@ -438,19 +459,19 @@ func (s *Source) SaveAttachment(ctx context.Context, mailEntryID string, index i
 		}
 		mail, err := callObj(ns, "GetItemFromID", args...)
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("guardar el adjunto", err)
 		}
 		defer release(mail)
 		atts, err := getObj(mail, "Attachments")
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("guardar el adjunto", err)
 		}
 		defer release(atts)
 		a, err := getObj(atts, "Item", index)
 		if err != nil {
-			return s.checkConn(err)
+			return s.fail("guardar el adjunto", err)
 		}
 		defer release(a)
-		return s.checkConn(call(a, "SaveAsFile", destPath))
+		return s.fail("guardar el adjunto", call(a, "SaveAsFile", destPath))
 	})
 }

@@ -5,6 +5,7 @@ package outlook
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -61,5 +62,18 @@ func TestCloseDoesNotHangWhenSTABusy(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("Close con el STA ocupado debería informar que no se pudo liberar Outlook")
+	}
+}
+
+func TestRememberStoreBounded(t *testing.T) {
+	s := &Source{stores: map[string]string{}}
+	for i := 0; i <= storesMax; i++ {
+		s.rememberStore(fmt.Sprintf("mail-%d", i), "store")
+	}
+	if len(s.stores) > storesMax {
+		t.Fatalf("len(stores) = %d, máximo %d", len(s.stores), storesMax)
+	}
+	if s.stores[fmt.Sprintf("mail-%d", storesMax)] != "store" {
+		t.Fatal("la última entrada no quedó registrada")
 	}
 }

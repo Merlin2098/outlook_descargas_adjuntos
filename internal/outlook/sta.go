@@ -105,17 +105,22 @@ func (s *sta) abandon() {
 }
 
 // stream corre produce en el STA y entrega cada item al goroutine que llama, que corre fn.
-// fn nunca corre dentro del STA, así puede hacer otras llamadas a la fuente sin bloquearse.
+// fn corre fuera del STA, pero no debe llamar a la fuente: el STA sigue ocupado con produce, así que
+// cualquier otra llamada espera a que termine el recorrido.
 // yield devuelve false cuando hay que parar: fn devolvió source.ErrStopScan u otro error, o ctx terminó.
 func stream[T any](ctx context.Context, s *sta, produce func(yield func(T) bool) error, fn func(T) error) error {
 	items := make(chan T)
 	stopped := make(chan struct{})
 	var stopOnce sync.Once
 	stop := func() { stopOnce.Do(func() { close(stopped) }) }
+	// Si fn hace panic, el productor deja de esperar y el STA queda libre.
+	defer stop()
 	produced := make(chan error, 1)
 
 	go func() {
-		produced <- s.do(ctx, func() error {
+		ran := false
+		err := s.do(ctx, func() error {
+			ran = true
 			defer close(items)
 			return produce(func(v T) bool {
 				select {
@@ -128,8 +133,12 @@ func stream[T any](ctx context.Context, s *sta, produce func(yield func(T) bool)
 				}
 			})
 		})
+		if !ran {
+			// do volvió sin correr produce (STA cerrado o ctx terminado): nadie cerrará items.
+			close(items)
+		}
+		produced <- err
 	}()
-
 	var result error
 	byUs := false // paramos nosotros: lo que devuelva produce ya no importa
 loop:

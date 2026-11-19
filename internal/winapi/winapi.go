@@ -19,9 +19,10 @@ var (
 
 	procSetThreadExecutionState = kernel32.NewProc("SetThreadExecutionState")
 	procMessageBeep             = user32.NewProc("MessageBeep")
-	procFindWindowW             = user32.NewProc("FindWindowW")
 	procGetForegroundWindow     = user32.NewProc("GetForegroundWindow")
 	procFlashWindowEx           = user32.NewProc("FlashWindowEx")
+	procEnumWindows             = user32.NewProc("EnumWindows")
+	procGetWindowTextW          = user32.NewProc("GetWindowTextW")
 )
 
 // Flags de SetThreadExecutionState.
@@ -72,14 +73,26 @@ func Beep() {
 	procMessageBeep.Call(mbIconAsterisk)
 }
 
-// FindWindow devuelve la ventana de nivel superior con ese título, o 0.
-func FindWindow(title string) uintptr {
-	p, err := windows.UTF16PtrFromString(title)
-	if err != nil {
-		return 0
-	}
-	h, _, _ := procFindWindowW.Call(0, uintptr(unsafe.Pointer(p)))
-	return h
+// FindOwnWindow devuelve la ventana de nivel superior de este proceso con ese título, o 0.
+// A diferencia de FindWindowW, no confunde la app con otra ventana que tenga el mismo título.
+func FindOwnWindow(title string) uintptr {
+	pid := windows.GetCurrentProcessId()
+	var found uintptr
+	buf := make([]uint16, 512)
+	cb := windows.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
+		var owner uint32
+		if _, err := windows.GetWindowThreadProcessId(windows.HWND(hwnd), &owner); err != nil || owner != pid {
+			return 1
+		}
+		n, _, _ := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+		if windows.UTF16ToString(buf[:n]) == title {
+			found = hwnd
+			return 0 // detiene la enumeración
+		}
+		return 1
+	})
+	procEnumWindows.Call(cb, 0)
+	return found
 }
 
 // IsForeground indica si hwnd es la ventana en primer plano.
@@ -108,7 +121,8 @@ func FlashWindow(hwnd uintptr) {
 }
 
 // OpenPath abre una carpeta o un archivo con su aplicación asociada (ShellExecute "open").
-// A diferencia de explorer.exe, no reinterpreta las comas de la ruta.
+// A diferencia de explorer.exe, no reinterpreta las comas de la ruta. ShellExecute puede usar COM
+// (extensiones del shell), así que corre en un hilo propio con COM inicializado como pide su documentación.
 func OpenPath(path string) error {
 	if _, err := os.Stat(path); err != nil {
 		return err
@@ -121,5 +135,15 @@ func OpenPath(path string) error {
 	if err != nil {
 		return err
 	}
-	return windows.ShellExecute(0, verb, file, nil, nil, swShowNormal)
+	done := make(chan error, 1)
+	go func() {
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+		// S_FALSE (el hilo ya tenía COM) también exige su CoUninitialize; RPC_E_CHANGED_MODE no.
+		if err := windows.CoInitializeEx(0, windows.COINIT_APARTMENTTHREADED|windows.COINIT_DISABLE_OLE1DDE); err == nil || err == windows.Errno(1) {
+			defer windows.CoUninitialize()
+		}
+		done <- windows.ShellExecute(0, verb, file, nil, nil, swShowNormal)
+	}()
+	return <-done
 }

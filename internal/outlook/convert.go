@@ -108,3 +108,8 @@ func folderPath(p string) string { return strings.TrimLeft(p, `\`) }
 func connectError(err error) error {
 	return fmt.Errorf("%w (%v)", domain.ErrOutlookUnavailable, err)
 }
+
+// comError da contexto en español a un error de Outlook que no es de desconexión, para la UI y el log.
+func comError(op string, err error) error {
+	return fmt.Errorf("Outlook devolvió un error al %s: %w", op, err) //nolint:staticcheck // texto visible
+}

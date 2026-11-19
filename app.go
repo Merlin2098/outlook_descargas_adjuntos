@@ -50,7 +50,7 @@ func (e wailsEmitter) Emit(event string, payload any) {
 	}
 }
 
-// appTitle es el título de la ventana; FindWindow lo usa para hacerla parpadear.
+// appTitle es el título de la ventana; FindOwnWindow lo usa para hacerla parpadear.
 const appTitle = "outlook_descargas_adjuntos"
 
 // notifier avisa al usuario que un job terminó.
@@ -65,7 +65,7 @@ type windowNotifier struct{}
 func (windowNotifier) Beep() { winapi.Beep() }
 
 func (windowNotifier) Flash() {
-	if h := winapi.FindWindow(appTitle); h != 0 && !winapi.IsForeground(h) {
+	if h := winapi.FindOwnWindow(appTitle); h != 0 && !winapi.IsForeground(h) {
 		winapi.FlashWindow(h)
 	}
 }
