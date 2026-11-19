@@ -10,6 +10,8 @@ export const PHASES: readonly JobPhase[] = ['connecting', 'scanning', 'downloadi
 export interface JobState {
   jobId: string | null
   request: FormState | null
+  /** Carpeta de destino del job (del request, o de GetJobStatus si se recargó la ventana). */
+  destDir: string
   status: 'idle' | 'running' | 'cancelling' | JobOutcome
   progress: extract.Progress | null
   /** elapsedMs del job en el momento en que terminó cada fase. */
@@ -17,6 +19,8 @@ export interface JobState {
   downloadStartMs: number | null
   /** Últimas ACTIVITY_MAX líneas, la más nueva al final. */
   activity: extract.Activity[]
+  /** Cuántas actividades se recortaron desde el inicio del job: la key de la fila i es activityBase + i. */
+  activityBase: number
   terminal: jobs.Terminal | null
 }
 
@@ -34,11 +38,13 @@ export type JobAction =
 export const initialJob: JobState = {
   jobId: null,
   request: null,
+  destDir: '',
   status: 'idle',
   progress: null,
   phaseEndsMs: {},
   downloadStartMs: null,
   activity: [],
+  activityBase: 0,
   terminal: null,
 }
 
@@ -66,7 +72,7 @@ function outcomeOf(t: jobs.Terminal): JobOutcome {
 export function jobReducer(s: JobState, a: JobAction): JobState {
   switch (a.type) {
     case 'started':
-      return {...initialJob, status: 'running', jobId: a.jobId, request: a.request}
+      return {...initialJob, status: 'running', jobId: a.jobId, request: a.request, destDir: a.request.destDir}
     case 'cancelRequested':
       return s.status === 'running' ? {...s, status: 'cancelling'} : s
     case 'progress':
@@ -74,7 +80,8 @@ export function jobReducer(s: JobState, a: JobAction): JobState {
     case 'activity': {
       if (!isActive(s)) return s
       const all = s.activity.concat(a.items)
-      return {...s, activity: all.length > ACTIVITY_MAX ? all.slice(all.length - ACTIVITY_MAX) : all}
+      const cut = Math.max(0, all.length - ACTIVITY_MAX)
+      return {...s, activity: cut > 0 ? all.slice(cut) : all, activityBase: s.activityBase + cut}
     }
     case 'terminal':
       // Un terminal de otro job (por ejemplo, el cancelado antes de relanzar) se ignora.
@@ -83,7 +90,8 @@ export function jobReducer(s: JobState, a: JobAction): JobState {
     case 'restored': {
       const st = a.status
       if (!st.jobId) return initialJob
-      const base: JobState = {...initialJob, jobId: st.jobId, request: a.request, activity: st.recent ?? []}
+      const base: JobState = {...initialJob, jobId: st.jobId, request: a.request,
+        destDir: st.destDir || a.request?.destDir || '', activity: st.recent ?? []}
       if (st.running) return applyProgress({...base, status: 'running'}, st.progress)
       if (!st.last) return initialJob
       return {...base, status: outcomeOf(st.last), progress: st.progress, terminal: st.last}

@@ -374,3 +374,20 @@ func TestRunSummaryFlat(t *testing.T) {
 		t.Fatalf("BySubfolder = %v, Saved = %d", s.BySubfolder, s.Saved)
 	}
 }
+
+func TestRunReportWriteFails(t *testing.T) {
+	orig := writeReport
+	writeReport = func(string, domain.JobRequest, []domain.RunRecord, domain.Summary) error {
+		return errors.New("disco lleno")
+	}
+	defer func() { writeReport = orig }()
+	src := demoSource()
+	req := baseReq(t, folderRef(t, src, "Facturas proveedores"))
+	res, err := Run(context.Background(), src, req, &captureSink{}, fixedNow)
+	if err == nil || !strings.Contains(err.Error(), "disco lleno") {
+		t.Fatalf("Run = %v, want error del reporte", err)
+	}
+	if res.ReportPath != "" {
+		t.Fatalf("ReportPath = %q, want vacío si el reporte no se escribió", res.ReportPath)
+	}
+}

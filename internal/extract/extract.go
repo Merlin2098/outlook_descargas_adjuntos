@@ -26,6 +26,9 @@ const (
 	PhaseReporting   Phase = "reporting"
 )
 
+// writeReport es una variable para poder simular un fallo de escritura en los tests.
+var writeReport = report.WriteExcel
+
 // earlyExitAfter es cuántos elementos consecutivos anteriores al rango cortan el escaneo de una carpeta.
 const earlyExitAfter = 100
 
@@ -122,10 +125,15 @@ func Run(ctx context.Context, src source.MailSource, req domain.JobRequest, sink
 	r.sum.Finished = now()
 	reportPath, err := fsutil.UniquePath(req.DestDir, report.FileName(r.sum.Finished))
 	if err == nil {
-		err = report.WriteExcel(reportPath, req, r.recs, r.sum)
+		err = writeReport(reportPath, req, r.recs, r.sum)
 	}
 	res := Result{Summary: r.sum, Records: r.recs, ReportPath: reportPath}
 	if err != nil {
+		// Sin reporte válido no se ofrece abrirlo; se borra lo que haya quedado a medias.
+		if reportPath != "" {
+			_ = os.Remove(reportPath)
+		}
+		res.ReportPath = ""
 		return res, fmt.Errorf("escribir reporte: %w", err)
 	}
 	return res, ctx.Err()

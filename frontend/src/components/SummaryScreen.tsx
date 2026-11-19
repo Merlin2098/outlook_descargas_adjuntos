@@ -29,7 +29,7 @@ export function SummaryScreen({job, onNew}: Props) {
   const exts = extRows(s.byExt)
   const reasons = reasonRows(s)
   const subs = subfolderRows(s.bySubfolder)
-  const dest = job.request?.destDir ?? ''
+  const dest = job.destDir
   const flat = subs.length === 1 && subs[0].name === ''
 
   const open = async (fn: () => Promise<void>) => {

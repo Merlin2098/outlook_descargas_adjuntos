@@ -150,7 +150,7 @@ export function ProgressScreen({job, onCancel}: Props) {
                    stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24
                  }}>
               {job.activity.length === 0 && <span className="hint">{es.progress.waiting}</span>}
-              {job.activity.map((a, i) => <ActivityRow key={i} a={a} latest={i === job.activity.length - 1}/>)}
+              {job.activity.map((a, i) => <ActivityRow key={job.activityBase + i} a={a} latest={i === job.activity.length - 1}/>)}
             </div>
           </section>
         </div>

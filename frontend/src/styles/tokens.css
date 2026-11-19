@@ -18,6 +18,28 @@
   --success-text: #047857;
   --warning-text: #B45309;
   --error-text: #DC2626;
+  /* Tonos suaves y de tinta para fondos de estado, chips y textos sobre ellos */
+  --primary-soft: #E0F2FE;
+  --primary-ink: #075985;
+  --muted-ink: #94A3B8;
+  --ink-strong: #0F172A;
+  --on-primary: #FFFFFF;
+  --success-soft: #ECFDF5;
+  --success-border: #A7F3D0;
+  --success-ink: #065F46;
+  --warning-soft: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-ink: #92400E;
+  --error-soft: #FEF2F2;
+  --error-border: #FECACA;
+  --error-ink: #991B1B;
+  --error-row: #B91C1C;
+  --accent-soft: #F5F3FF;
+  --accent-ink: #6D28D9;
+  --info-soft: #ECFEFF;
+  --info-border: #A5F3FC;
+  --info-ink: #155E75;
+  --info-icon: #0E7490;
   --radius-control: 4px;
   --radius-card: 8px;
   --font-ui: 'Inter', system-ui, sans-serif;

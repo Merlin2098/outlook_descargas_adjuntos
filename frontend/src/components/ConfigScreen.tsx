@@ -1,4 +1,4 @@
-import {KeyboardEvent, useMemo, useState} from 'react'
+import {KeyboardEvent, useState} from 'react'
 import {PickDirectory, StartJob} from '../../wailsjs/go/main/App'
 import {domain} from '../../wailsjs/go/models'
 import {es} from '../i18n/es'
@@ -30,7 +30,8 @@ export function ConfigScreen({form, onChange, onStarted}: Props) {
     setStartError(null)
     onChange({...form, [k]: v})
   }
-  const pre = useMemo(() => presets(new Date()), [])
+  // Se recalculan en cada render: si la app queda abierta pasada la medianoche, siguen vigentes.
+  const pre = presets(new Date())
   const days = daysInclusive(form.range)
   const months = monthsInRange(form.range, 4)
   const invalid = validateForm(form)

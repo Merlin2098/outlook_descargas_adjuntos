@@ -23,12 +23,19 @@ export function FolderTree({selected, onSelect}: Props) {
   const childrenRef = useRef(children)
   childrenRef.current = children
 
+  // Generación del árbol: "Recargar" la incrementa y se descartan las respuestas de la anterior.
+  const gen = useRef(0)
+
   const loadChildren = useCallback((f: domain.Folder) => {
     const k = keyOf(f.ref)
-    setChildren((c) => ({...c, [k]: {state: 'loading'}}))
+    const g = gen.current
+    const put = (v: Children) => {
+      if (g === gen.current) setChildren((c) => ({...c, [k]: v}))
+    }
+    put({state: 'loading'})
     ListChildren(f.ref)
-      .then((items) => setChildren((c) => ({...c, [k]: {state: 'ok', items: items ?? []}})))
-      .catch((e: unknown) => setChildren((c) => ({...c, [k]: {state: 'error', message: errText(e)}})))
+      .then((items) => put({state: 'ok', items: items ?? []}))
+      .catch((e: unknown) => put({state: 'error', message: errText(e)}))
   }, [])
 
   const toggle = useCallback((f: domain.Folder) => {
@@ -44,11 +51,13 @@ export function FolderTree({selected, onSelect}: Props) {
   }, [loadChildren])
 
   const reload = useCallback(() => {
+    const g = ++gen.current
     setRoots({state: 'loading'})
     setChildren({})
     setExpanded(new Set())
     ListRoots()
       .then((items) => {
+        if (g !== gen.current) return
         const list = items ?? []
         setRoots({state: 'ok', items: list})
         if (list[0]?.hasChildren) {
@@ -56,7 +65,9 @@ export function FolderTree({selected, onSelect}: Props) {
           loadChildren(list[0])
         }
       })
-      .catch((e: unknown) => setRoots({state: 'error', message: errText(e)}))
+      .catch((e: unknown) => {
+        if (g === gen.current) setRoots({state: 'error', message: errText(e)})
+      })
   }, [loadChildren])
 
   useEffect(reload, [reload])

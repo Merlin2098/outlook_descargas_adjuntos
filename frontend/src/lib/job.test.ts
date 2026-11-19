@@ -128,3 +128,23 @@ describe('percent y etaMs', () => {
     expect(etaMs({...s, downloadStartMs: null})).toBeNull()
   })
 })
+
+describe('destDir y activityBase', () => {
+  it('started toma el destino del request', () => {
+    expect(running().destDir).toBe(form.destDir)
+  })
+
+  it('restored usa status.destDir aunque no haya request', () => {
+    const st = jobs.Status.createFrom({jobId: 'z', running: false, destDir: 'D:/otro', progress: prog({}), recent: null, last: term('z')})
+    expect(jobReducer(initialJob, {type: 'restored', status: st, request: null}).destDir).toBe('D:/otro')
+  })
+
+  it('activityBase cuenta las actividades recortadas y se reinicia al empezar', () => {
+    const items = Array.from({length: ACTIVITY_MAX + 5}, (_, i) => act(`f${i}`))
+    const s = jobReducer(running(), {type: 'activity', items})
+    expect(s.activityBase).toBe(5)
+    const s2 = jobReducer(s, {type: 'activity', items: [act('x'), act('y')]})
+    expect(s2.activityBase).toBe(7)
+    expect(jobReducer(s2, {type: 'started', jobId: 'n', request: form}).activityBase).toBe(0)
+  })
+})
