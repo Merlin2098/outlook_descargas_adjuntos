@@ -9,5 +9,11 @@
   "author": {
     "name": "",
     "email": ""
+  },
+  "info": {
+    "companyName": "",
+    "productName": "outlook_descargas_adjuntos",
+    "productVersion": "0.1.0",
+    "comments": "Descarga en bloque los adjuntos de una carpeta de Outlook Classic"
   }
 }

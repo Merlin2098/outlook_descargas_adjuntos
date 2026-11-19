@@ -2,9 +2,11 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/wailsapp/wails/v2"
@@ -29,6 +31,10 @@ func setupLog() (*slog.Logger, io.Closer) {
 }
 
 func main() {
+	if slices.Contains(os.Args[1:], "--version") {
+		fmt.Println(appVersion)
+		return
+	}
 	log, closer := setupLog()
 	defer closer.Close()
 

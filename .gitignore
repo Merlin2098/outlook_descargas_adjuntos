@@ -9,3 +9,4 @@ _scaffold/
 .superpowers/
 .tools/
 .playwright-mcp/
+*.exe
