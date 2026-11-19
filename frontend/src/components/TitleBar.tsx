@@ -1,8 +1,9 @@
 import {useEffect, useState} from 'react'
-import {ConfirmClose, SourceInfo} from '../../wailsjs/go/main/App'
+import {ConfirmClose, GetConfig, SaveConfig, SourceInfo} from '../../wailsjs/go/main/App'
 import {main} from '../../wailsjs/go/models'
 import {EventsOn, Quit, WindowMinimise, WindowToggleMaximise} from '../../wailsjs/runtime/runtime'
 import {es} from '../i18n/es'
+import {applyTheme, Theme, toggleTheme} from '../lib/theme'
 import {ConfirmDialog} from './ConfirmDialog'
 import {Icon} from './Icon'
 
@@ -11,10 +12,12 @@ interface Props {
   status?: string
   /** Hay un job en curso: cerrar pide confirmación. */
   busy: boolean
+  theme: Theme
+  onThemeChange: (t: Theme) => void
 }
 
 /** Barra de título propia de la ventana sin marco. Se arrastra desde cualquier punto que no sea un botón. */
-export function TitleBar({status, busy}: Props) {
+export function TitleBar({status, busy, theme, onThemeChange}: Props) {
   const [info, setInfo] = useState<main.SourceInfo | null>(null)
   const [confirming, setConfirming] = useState(false)
 
@@ -27,6 +30,14 @@ export function TitleBar({status, busy}: Props) {
 
   const close = () => (busy ? setConfirming(true) : Quit())
 
+  // Lee la config vigente antes de guardar para no pisar lo que el backend cambió al lanzar un job.
+  const switchTheme = () => {
+    const next = toggleTheme(theme)
+    applyTheme(next)
+    onThemeChange(next)
+    GetConfig().then((c) => SaveConfig({...c, theme: next})).catch(() => undefined)
+  }
+
   return (
     <header className="titlebar">
       <div className="titlebar-logo"><Icon name="download" size={12} strokeWidth={2.6}/></div>
@@ -36,6 +47,13 @@ export function TitleBar({status, busy}: Props) {
       <div className="spacer"/>
       {status && <span className="mono titlebar-status">{status}</span>}
       <div className="window-buttons">
+        <button
+          aria-label={theme === 'dark' ? es.titleBar.themeToLight : es.titleBar.themeToDark}
+          title={theme === 'dark' ? es.titleBar.themeToLight : es.titleBar.themeToDark}
+          onClick={switchTheme}
+        >
+          <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={14} strokeWidth={1.6}/>
+        </button>
         <button aria-label={es.titleBar.minimize} onClick={WindowMinimise}><Icon name="minimize" size={12} strokeWidth={1.2}/></button>
         <button aria-label={es.titleBar.maximize} onClick={WindowToggleMaximise}><Icon name="maximize" size={12} strokeWidth={1.2}/></button>
         <button aria-label={es.titleBar.close} className="window-close" onClick={close}><Icon name="close" size={12} strokeWidth={1.2}/></button>

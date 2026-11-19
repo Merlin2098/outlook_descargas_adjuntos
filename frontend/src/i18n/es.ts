@@ -6,6 +6,8 @@ export const es = {
     minimize: 'Minimizar',
     maximize: 'Maximizar',
     close: 'Cerrar',
+    themeToDark: 'Cambiar a tema oscuro',
+    themeToLight: 'Cambiar a tema claro',
     confirmClose: {
       title: 'Hay una descarga en curso',
       message: 'Si sales ahora se cancela la descarga. Los archivos ya guardados se conservan y se escribe el reporte parcial.',

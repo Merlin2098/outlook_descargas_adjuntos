@@ -64,7 +64,7 @@ h1, h2, p { margin: 0; }
 /* Tarjetas y títulos */
 .card {
   padding: 16px 18px; border-radius: var(--radius-card); background: var(--surface);
-  border: 1px solid var(--border-soft); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-soft); box-shadow: var(--shadow);
   display: flex; flex-direction: column; gap: 12px;
 }
 .section-title { font-size: 16px; font-weight: 600; color: var(--primary-strong); }
@@ -308,7 +308,7 @@ h1, h2, p { margin: 0; }
 .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; flex: none; }
 .metric {
   padding: 14px 16px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--border-soft);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2);
+  box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2);
 }
 .metric-value { font-size: 28px; font-weight: 500; color: var(--text); }
 .metric-value.primary { color: var(--primary-strong); }

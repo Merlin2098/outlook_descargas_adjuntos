@@ -57,7 +57,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 248, G: 250, B: 252, A: 1},
+		BackgroundColour: backgroundFor(cfg.Theme),
 		OnStartup:        app.startup,
 		OnShutdown:       app.shutdown,
 		OnBeforeClose:    app.beforeClose,
@@ -66,4 +66,12 @@ func main() {
 	if err != nil {
 		log.Error("error de Wails", "error", err)
 	}
+}
+
+// backgroundFor es el color de fondo de la ventana mientras carga el WebView, según el tema guardado.
+func backgroundFor(theme string) *options.RGBA {
+	if theme == config.ThemeDark {
+		return &options.RGBA{R: 13, G: 15, B: 34, A: 1}
+	}
+	return &options.RGBA{R: 248, G: 250, B: 252, A: 1}
 }

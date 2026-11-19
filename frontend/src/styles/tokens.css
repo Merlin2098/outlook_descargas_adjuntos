@@ -40,8 +40,54 @@
   --info-border: #A5F3FC;
   --info-ink: #155E75;
   --info-icon: #0E7490;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   --radius-control: 4px;
   --radius-card: 8px;
   --font-ui: 'Inter', system-ui, sans-serif;
   --font-mono: 'Fira Code', ui-monospace, monospace;
+}
+
+/* Tema oscuro: derivado de theme_dark.json del original, con ajustes de contraste AA (Plan 4, D-a). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0D0F22;
+  --surface: #1B2233;
+  --surface-alt: #252D42;
+  --border: #334155;
+  --border-soft: #2C3549;
+  --text: #E2E8F0;
+  --text-2: #94A3B8;
+  --text-3: #7C8BA1;
+  --primary: #38BDF8;
+  --primary-strong: #38BDF8;
+  --accent: #E879F9;
+  --success: #22C55E;
+  --warning: #FBBF24;
+  --error: #F43F5E;
+  --info: #38BDF8;
+  --success-text: #4ADE80;
+  --warning-text: #FCD34D;
+  --error-text: #FB7185;
+  --primary-soft: rgba(56, 189, 248, 0.15);
+  --primary-ink: #7DD3FC;
+  --muted-ink: #64748B;
+  --ink-strong: #E2E8F0;
+  --on-primary: #0D0F22;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --success-border: rgba(34, 197, 94, 0.35);
+  --success-ink: #86EFAC;
+  --warning-soft: rgba(251, 191, 36, 0.12);
+  --warning-border: rgba(251, 191, 36, 0.35);
+  --warning-ink: #FDE68A;
+  --error-soft: rgba(244, 63, 94, 0.12);
+  --error-border: rgba(244, 63, 94, 0.35);
+  --error-ink: #FDA4AF;
+  --error-row: #FDA4AF;
+  --accent-soft: rgba(232, 121, 249, 0.12);
+  --accent-ink: #F0ABFC;
+  --info-soft: rgba(56, 189, 248, 0.10);
+  --info-border: rgba(56, 189, 248, 0.30);
+  --info-ink: #BAE6FD;
+  --info-icon: #38BDF8;
+  --shadow: none;
 }

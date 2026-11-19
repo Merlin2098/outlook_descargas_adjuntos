@@ -10,6 +10,7 @@ import {presets} from './lib/dates'
 import {formatPercent} from './lib/format'
 import {percent} from './lib/job'
 import {FormState} from './lib/request'
+import {applyTheme, normalizeTheme, Theme} from './lib/theme'
 
 const initialForm = (): FormState => ({
   folder: null,
@@ -27,9 +28,16 @@ const initialForm = (): FormState => ({
 function App() {
   const {job, start, cancel, reset} = useJob()
   const [form, setForm] = useState<FormState>(initialForm)
+  const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {
     GetConfig()
+      .then((c) => {
+        const t = normalizeTheme(c.theme)
+        applyTheme(t)
+        setTheme(t)
+        return c
+      })
       .then((c) => setForm((f) => ({
         ...f,
         destDir: f.destDir || c.lastDestDir || '',
@@ -54,7 +62,7 @@ function App() {
 
   return (
     <div className="app">
-      <TitleBar status={status} busy={busy}/>
+      <TitleBar status={status} busy={busy} theme={theme} onThemeChange={setTheme}/>
       <div className="app-body">
         {/* Configurar queda montada (oculta) para conservar el árbol y el formulario al volver. */}
         <div className="screen" hidden={job.status !== 'idle'}>

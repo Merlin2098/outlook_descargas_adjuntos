@@ -6,6 +6,7 @@ export namespace config {
 	    skipInline: boolean;
 	    windowWidth: number;
 	    windowHeight: number;
+	    theme: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -18,6 +19,7 @@ export namespace config {
 	        this.skipInline = source["skipInline"];
 	        this.windowWidth = source["windowWidth"];
 	        this.windowHeight = source["windowHeight"];
+	        this.theme = source["theme"];
 	    }
 	}
 

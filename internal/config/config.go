@@ -23,11 +23,18 @@ type Config struct {
 	SkipInline   bool            `json:"skipInline"`
 	WindowWidth  int             `json:"windowWidth"`
 	WindowHeight int             `json:"windowHeight"`
+	Theme        string          `json:"theme"` // "light" | "dark"
 }
+
+// Temas de la UI.
+const (
+	ThemeLight = "light"
+	ThemeDark  = "dark"
+)
 
 // Default devuelve la configuración de fábrica.
 func Default() Config {
-	return Config{Organize: domain.OrganizeByMonth, SkipInline: true, WindowWidth: 1280, WindowHeight: 720}
+	return Config{Organize: domain.OrganizeByMonth, SkipInline: true, WindowWidth: 1280, WindowHeight: 720, Theme: ThemeLight}
 }
 
 // Dir devuelve %APPDATA%\outlook_descargas_adjuntos.
@@ -51,6 +58,9 @@ func Load(dir string) (Config, error) {
 	c := Default()
 	if err := json.Unmarshal(b, &c); err != nil {
 		return Default(), fmt.Errorf("config corrupta: %w", err)
+	}
+	if c.Theme != ThemeDark {
+		c.Theme = ThemeLight
 	}
 	return c, nil
 }
