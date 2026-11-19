@@ -163,7 +163,7 @@ la sección "Deferred minors" del cierre del Plan 3 (M1–M8).
 **Archivos:**
 - Crear: `docs/img/configurar.png`, `docs/img/en-curso.png`, `docs/img/resumen.png`, `docs/img/configurar-oscuro.png`, `docs/img/resumen-oscuro.png`
 
-- [ ] **Paso 1:** con `.tools/wails.exe dev -appargs "--demo"`, abrir `http://localhost:34115` en Playwright a 1280×720. Como destino, escribir `C:\demodjuntos` (la app la crea; es una ruta neutra que puede aparecer en las capturas) y borrarla al terminar. Capturar:
+- [ ] **Paso 1:** con `.tools/wails.exe dev -appargs "--demo"`, abrir `http://localhost:34115` en Playwright a 1280×720. Como destino, escribir `C:\demo\adjuntos` (la app la crea; es una ruta neutra que puede aparecer en las capturas) y borrarla al terminar. Capturar:
   - Configurar con "Facturas proveedores", "Último trimestre", asunto `factura` y extensiones `.pdf .xml`.
   - En curso cerca del 50 %.
   - Resumen completado.
