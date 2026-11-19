@@ -7,4 +7,11 @@ export const es = {
     maximize: 'Maximizar',
     close: 'Cerrar',
   },
+  config: {
+    errors: {
+      noFolder: 'Debe seleccionar una carpeta de Outlook',
+      noDest: 'Debe seleccionar una carpeta de destino',
+      badRange: 'La fecha de inicio es posterior a la fecha fin',
+    },
+  },
 } as const
