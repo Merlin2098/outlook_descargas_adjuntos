@@ -56,6 +56,8 @@ function applyProgress(s: JobState, p: extract.Progress): JobState {
 
 /** Resultado de un terminal recuperado con GetJobStatus. */
 function outcomeOf(t: jobs.Terminal): JobOutcome {
+  // El backend repite en Outcome el evento que emitió; lo demás es respaldo.
+  if (t.outcome === 'done' || t.outcome === 'cancelled' || t.outcome === 'error') return t.outcome
   if (t.message) return 'error'
   if (t.summary?.cancelled) return 'cancelled'
   return 'done'
@@ -89,6 +91,18 @@ export function jobReducer(s: JobState, a: JobAction): JobState {
     case 'reset':
       return initialJob
   }
+}
+
+/**
+ * Acciones para recuperar el estado con GetJobStatus. Si el terminal del job restaurado llegó antes que la
+ * respuesta (se guardó en early porque aún no se conocía el id), se aplica después de restaurar.
+ */
+export function restoreActions(status: jobs.Status, request: FormState | null,
+                               early: ReadonlyMap<string, JobAction>): JobAction[] {
+  const out: JobAction[] = [{type: 'restored', status, request}]
+  const pending = status.jobId ? early.get(status.jobId) : undefined
+  if (pending) out.push(pending)
+  return out
 }
 
 /** Avance 0..1 durante la descarga; null cuando no se puede calcular (barra indeterminada). */

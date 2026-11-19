@@ -31,9 +31,18 @@ type Emitter interface {
 	Emit(event string, payload any)
 }
 
+// Resultado de un job, igual al sufijo de su evento terminal.
+const (
+	OutcomeDone      = "done"
+	OutcomeCancelled = "cancelled"
+	OutcomeError     = "error"
+)
+
 // Terminal es el payload de job:done, job:error y job:cancelled.
+// Outcome repite el resultado del evento para quien lo lea después con Status (p. ej. tras recargar la UI).
 type Terminal struct {
 	JobID      string         `json:"jobId"`
+	Outcome    string         `json:"outcome"`
 	Summary    domain.Summary `json:"summary"`
 	ReportPath string         `json:"reportPath"`
 	Message    string         `json:"message"`
@@ -194,14 +203,15 @@ func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest, don
 
 	term := Terminal{JobID: id, Summary: res.Summary, ReportPath: res.ReportPath}
 	event := EventDone
+	term.Outcome = OutcomeDone
 	switch {
 	case err == nil:
 		log.Info("job terminado", "guardados", res.Summary.Saved, "errores", res.Summary.Errors)
 	case errors.Is(err, context.Canceled):
-		event = EventCancelled
+		event, term.Outcome = EventCancelled, OutcomeCancelled
 		log.Info("job cancelado", "guardados", res.Summary.Saved)
 	default:
-		event = EventError
+		event, term.Outcome = EventError, OutcomeError
 		term.Message = err.Error()
 		log.Error("job con error", "error", err)
 	}

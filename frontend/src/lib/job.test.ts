@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {domain, extract, jobs} from '../../wailsjs/go/models'
-import {ACTIVITY_MAX, etaMs, initialJob, jobReducer, JobState, percent} from './job'
+import {ACTIVITY_MAX, etaMs, initialJob, JobAction, jobReducer, JobState, percent, restoreActions} from './job'
 import {FormState} from './request'
 
 const form: FormState = {
@@ -85,6 +85,22 @@ describe('jobReducer', () => {
     expect(jobReducer(initialJob, {type: 'restored', status: cancelled, request: null}).status).toBe('cancelled')
     const failed = jobs.Status.createFrom({...base, last: term('z', {message: 'falló'})})
     expect(jobReducer(initialJob, {type: 'restored', status: failed, request: null}).status).toBe('error')
+  })
+
+  it('restored usa el outcome explícito del terminal', () => {
+    const base = {jobId: 'z', running: false, destDir: 'C:\\d', progress: prog({}), recent: null}
+    // Cancelado durante el reporte: summary.cancelled queda en false pero el evento fue job:cancelled.
+    const st = jobs.Status.createFrom({...base, last: term('z', {outcome: 'cancelled'})})
+    expect(jobReducer(initialJob, {type: 'restored', status: st, request: null}).status).toBe('cancelled')
+  })
+
+  it('restoreActions aplica el terminal que llegó antes que GetJobStatus', () => {
+    const st = jobs.Status.createFrom({jobId: 'z', running: true, destDir: 'C:\\d', progress: prog({phase: 'reporting'}), recent: []})
+    const early = new Map<string, JobAction>([['z', {type: 'terminal', outcome: 'done', payload: term('z')}]])
+    const s = restoreActions(st, form, early).reduce(jobReducer, initialJob)
+    expect(s.status).toBe('done')
+    expect(s.terminal?.jobId).toBe('z')
+    expect(restoreActions(st, form, new Map())).toHaveLength(1)
   })
 
   it('restored sin job vuelve al estado inicial', () => {

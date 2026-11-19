@@ -110,3 +110,31 @@ func TestStatusNewJobResetsRecent(t *testing.T) {
 	em.waitTerminal(t)
 	m.Wait(10 * time.Second)
 }
+
+func TestTerminalOutcome(t *testing.T) {
+	src := demoSrc()
+	em := newEmitter()
+	m := NewManager(src, em, 10*time.Millisecond, quietLog())
+	if _, err := m.Start(facturasReq(t, src)); err != nil {
+		t.Fatal(err)
+	}
+	e := em.waitTerminal(t)
+	m.Wait(10 * time.Second)
+	if got := e.payload.(Terminal).Outcome; got != OutcomeDone {
+		t.Fatalf("Outcome del evento = %q, want %q", got, OutcomeDone)
+	}
+	if got := m.Status().Last.Outcome; got != OutcomeDone {
+		t.Fatalf("Status().Last.Outcome = %q", got)
+	}
+
+	id, err := m.Start(facturasReq(t, src))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = m.Cancel(id)
+	e = em.waitTerminal(t)
+	m.Wait(10 * time.Second)
+	if e.name != EventCancelled || e.payload.(Terminal).Outcome != OutcomeCancelled || m.Status().Last.Outcome != OutcomeCancelled {
+		t.Fatalf("cancelado: evento %s, outcome %q, last %q", e.name, e.payload.(Terminal).Outcome, m.Status().Last.Outcome)
+	}
+}

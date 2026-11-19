@@ -2,7 +2,7 @@ import {useCallback, useEffect, useReducer, useRef} from 'react'
 import {CancelJob, GetJobStatus} from '../../wailsjs/go/main/App'
 import {extract, jobs} from '../../wailsjs/go/models'
 import {EventsOn} from '../../wailsjs/runtime/runtime'
-import {initialJob, JobAction, jobReducer, JobOutcome, JobState} from '../lib/job'
+import {initialJob, JobAction, jobReducer, JobOutcome, JobState, restoreActions} from '../lib/job'
 import {FormState} from '../lib/request'
 
 // Nombres de los eventos de internal/jobs/manager.go.
@@ -61,7 +61,12 @@ export function useJob() {
         })),
     ]
     GetJobStatus()
-      .then((status) => dispatch({type: 'restored', status, request: loadRequest()}))
+      .then((status) => {
+        if (jobIdRef.current !== null) return // ya empezó otro job desde esta UI
+        jobIdRef.current = status.jobId || null
+        restoreActions(status, loadRequest(), early.current).forEach(dispatch)
+        early.current.clear()
+      })
       .catch(() => undefined)
     return () => offs.forEach((off) => off())
   }, [])
@@ -82,7 +87,14 @@ export function useJob() {
     try {
       await CancelJob(id)
     } catch {
-      // El job ya terminó: su evento terminal llega por su cuenta.
+      // El job ya no está en curso. Si su terminal se perdió, se recupera del backend
+      // para que la UI nunca quede en "Cancelando…".
+      try {
+        const status = await GetJobStatus()
+        if (status.jobId === id && !status.running) dispatch({type: 'restored', status, request: loadRequest()})
+      } catch {
+        // Sin backend no hay nada que recuperar.
+      }
     }
   }, [])
 

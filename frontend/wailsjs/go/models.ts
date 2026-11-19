@@ -221,6 +221,7 @@ export namespace jobs {
 	
 	export class Terminal {
 	    jobId: string;
+	    outcome: string;
 	    summary: domain.Summary;
 	    reportPath: string;
 	    message: string;
@@ -232,6 +233,7 @@ export namespace jobs {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.jobId = source["jobId"];
+	        this.outcome = source["outcome"];
 	        this.summary = this.convertValues(source["summary"], domain.Summary);
 	        this.reportPath = source["reportPath"];
 	        this.message = source["message"];
