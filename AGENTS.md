@@ -54,7 +54,7 @@ No lo modifiques ni ejecutes sus scripts. Ignora `agents2/` y cualquier referenc
 | Herramienta | Versión |
 | --- | --- |
 | Go | 1.27.x (windows/amd64) |
-| Wails CLI | v2.10.x |
+| Wails CLI | **v2.17.1 local en `.tools/wails.exe`** (instalar con `scripts/instalar-herramientas.ps1`). El CLI global v2.10.x falla con Go 1.27 al generar bindings |
 | Node / npm | 24.x / 12.x |
 
 Librerías previstas (verifica la API real en la documentación o en el código fuente de cada módulo antes de usarla; no inventes firmas):
@@ -91,9 +91,9 @@ Regla de dependencias: `domain` no importa nada externo. `extract` depende de la
 ## Comandos
 
 ```bash
-wails dev                       # desarrollo con hot reload
-wails dev -appargs "--demo"     # desarrollo con la fuente simulada (sin Outlook)
-wails build -clean -trimpath    # binario de release en build/bin/
+# "wails" = .tools/wails.exe (v2.17.1, fijado para este proyecto)
+.tools/wails.exe dev -appargs "--demo"     # desarrollo con la fuente simulada (sin Outlook)
+.tools/wails.exe build -clean -trimpath    # binario de release en build/bin/
 go test ./...                   # tests (deben pasar sin Outlook instalado)
 go vet ./...
 gofmt -l . && goimports -l .    # sin salida = formateado

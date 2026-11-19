@@ -7,3 +7,4 @@ Outlook_AttachExtractor_Rework/
 _scaffold/
 *.log
 .superpowers/
+.tools/
