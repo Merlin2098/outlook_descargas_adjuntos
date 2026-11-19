@@ -19,4 +19,7 @@ Objetivo de portafolio y video demo: @docs/demo-y-portafolio.md
   para iterar. Usa `wails dev` solo para verificar la UI o los bindings.
 - Las pruebas manuales contra Outlook real las hace el usuario. Si un cambio las requiere,
   dilo explícitamente y describe los pasos para verificarlo.
-- Este directorio no es un repo git (el legacy tiene su propio `.git`). No inicialices git sin pedirlo.
+- El repo git existe desde el Plan 1 (el legacy tiene su propio `.git` y está en `.gitignore`). Hacer commits,
+  mergear o publicar sigue requiriendo permiso del usuario.
+- Para verificar la UI sin abrir la ventana: con `wails dev` en marcha, abre `http://localhost:34115` en un navegador
+  (los bindings funcionan ahí). Las capturas van a `.playwright-mcp/` (ignorada por git), nunca al repo.

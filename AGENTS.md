@@ -63,7 +63,8 @@ Librerías previstas (verifica la API real en la documentación o en el código 
 - Win32 (energía, flash de ventana, beep): `golang.org/x/sys/windows`
 - Excel: `github.com/xuri/excelize/v2`
 - Logging: `log/slog` de la stdlib
-- Frontend: React + TypeScript + Vite (template `react-ts` de Wails)
+- Frontend: React 18 + TypeScript 5.6 + Vite 5.4 (base: template `react-ts` de Wails), Vitest 2.1 para la lógica de `src/lib/`,
+  fuentes locales con `@fontsource/inter` y `@fontsource/fira-code` (sin Google Fonts: la app es 100 % local)
 
 Si quieres agregar una dependencia que no está en esta lista, justifícala y prefiere la stdlib.
 
@@ -97,7 +98,9 @@ Regla de dependencias: `domain` no importa nada externo. `extract` depende de la
 go test ./...                   # tests (deben pasar sin Outlook instalado)
 go vet ./...
 gofmt -l . && goimports -l .    # sin salida = formateado
+cd frontend && npm test         # tests de la lógica del frontend (Vitest, src/lib/*.test.ts)
 cd frontend && npm run build    # typecheck + build del frontend
+.tools/wails.exe generate module   # regenera frontend/wailsjs/ tras cambiar bindings
 ```
 
 Wails regenera `frontend/wailsjs/`. **No edites esos archivos a mano.**
