@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log/slog"
 	"os"
-	"os/exec"
 	"sync"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	"outlook_descargas_adjuntos/internal/domain"
 	"outlook_descargas_adjuntos/internal/jobs"
 	"outlook_descargas_adjuntos/internal/source"
+	"outlook_descargas_adjuntos/internal/winapi"
 )
 
 // eventInterval limita los eventos de progreso y actividad a unos 10 por segundo.
@@ -39,6 +39,36 @@ type wailsEmitter struct{ app *App }
 func (e wailsEmitter) Emit(event string, payload any) {
 	if e.app.ctx != nil {
 		runtime.EventsEmit(e.app.ctx, event, payload)
+		notifyTerminal(event, windowNotifier{})
+	}
+}
+
+// appTitle es el título de la ventana; FindWindow lo usa para hacerla parpadear.
+const appTitle = "outlook_descargas_adjuntos"
+
+// notifier avisa al usuario que un job terminó.
+type notifier interface {
+	Beep()
+	Flash()
+}
+
+// windowNotifier suena siempre y hace parpadear la ventana solo si no está en primer plano.
+type windowNotifier struct{}
+
+func (windowNotifier) Beep() { winapi.Beep() }
+
+func (windowNotifier) Flash() {
+	if h := winapi.FindWindow(appTitle); h != 0 && !winapi.IsForeground(h) {
+		winapi.FlashWindow(h)
+	}
+}
+
+// notifyTerminal avisa (beep y parpadeo) cuando llega un evento terminal.
+func notifyTerminal(event string, n notifier) {
+	switch event {
+	case jobs.EventDone, jobs.EventError, jobs.EventCancelled:
+		n.Beep()
+		n.Flash()
 	}
 }
 
@@ -46,7 +76,7 @@ func (e wailsEmitter) Emit(event string, payload any) {
 func NewApp(src source.MailSource, log *slog.Logger, configDir string, cfg config.Config) *App {
 	a := &App{src: src, log: log, configDir: configDir, cfg: cfg}
 	if src != nil {
-		a.jobs = jobs.NewManager(src, wailsEmitter{a}, eventInterval, log)
+		a.jobs = jobs.NewManagerWith(src, wailsEmitter{a}, eventInterval, log, jobs.Options{Begin: winapi.KeepAwake})
 	}
 	return a
 }
@@ -166,7 +196,7 @@ func (a *App) open(report bool) error {
 	if err != nil {
 		return err
 	}
-	return exec.Command("explorer", path).Start()
+	return winapi.OpenPath(path)
 }
 
 // OpenDestination abre en el Explorador la carpeta de destino del último job.

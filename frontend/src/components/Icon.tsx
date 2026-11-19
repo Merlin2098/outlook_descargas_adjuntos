@@ -3,7 +3,7 @@ import {ReactElement} from 'react'
 
 export type IconName =
   | 'download' | 'minimize' | 'maximize' | 'close' | 'refresh' | 'chevronDown' | 'chevronRight'
-  | 'mail' | 'database' | 'check' | 'alert' | 'folder' | 'file' | 'stop' | 'x' | 'lock' | 'report'
+  | 'mail' | 'database' | 'check' | 'alert' | 'folder' | 'file' | 'stop' | 'x' | 'lock' | 'report' | 'moon'
 
 const paths: Record<IconName, {viewBox: string; body: ReactElement; fill?: boolean}> = {
   download: {viewBox: '0 0 24 24', body: <><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></>},
@@ -22,6 +22,7 @@ const paths: Record<IconName, {viewBox: string; body: ReactElement; fill?: boole
   stop: {viewBox: '0 0 24 24', body: <rect x="5" y="5" width="14" height="14" rx="2"/>, fill: true},
   lock: {viewBox: '0 0 24 24', body: <><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></>},
   report: {viewBox: '0 0 24 24', body: <><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></>},
+  moon: {viewBox: '0 0 24 24', body: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>},
   x: {viewBox: '0 0 24 24', body: <path d="M6 6l12 12M18 6 6 18"/>},
 }
 

@@ -52,7 +52,8 @@ export const es = {
     renamed: '(duplicado renombrado)',
     skipped: 'omitido',
     error: 'error',
-    minimizeHint: 'Puedes minimizar la ventana mientras se descarga.',
+    minimizeHint: 'Puedes minimizar la ventana: te avisaremos con un sonido al terminar.',
+    keepAwake: 'Suspensión del equipo bloqueada hasta que termine el job.',
     cancel: 'Cancelar descarga',
     cancelling: 'Cancelando…',
     phaseShort: {
@@ -107,6 +108,7 @@ export const es = {
     footer: (n: number, sub: boolean) => `${n === 1 ? 'elemento' : 'elementos'} en la carpeta${sub ? ' (más sus subcarpetas)' : ''}`,
     start: 'Iniciar descarga',
     starting: 'Iniciando…',
+    keepAwake: 'El equipo no entrará en suspensión mientras dure la descarga.',
     errors: {
       noFolder: 'Debe seleccionar una carpeta de Outlook',
       noDest: 'Debe seleccionar una carpeta de destino',

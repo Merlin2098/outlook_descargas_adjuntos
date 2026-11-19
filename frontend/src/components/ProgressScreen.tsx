@@ -111,6 +111,8 @@ export function ProgressScreen({job, onCancel}: Props) {
       <aside className="screen-aside aside-padded">
         <div className="aside-heading"><Icon name="lock" size={15}/><span className="section-title">{es.progress.params.title}</span></div>
         <JobParams request={job.request}/>
+        <div className="spacer"/>
+        <div className="info-note"><Icon name="moon" size={16}/><span>{es.progress.keepAwake}</span></div>
       </aside>
 
       <main className="screen-main">

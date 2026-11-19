@@ -104,3 +104,24 @@ func TestSourceInfoVersion(t *testing.T) {
 		t.Fatalf("Version = %q", v)
 	}
 }
+
+type fakeNotifier struct{ beeps, flashes int }
+
+func (f *fakeNotifier) Beep()  { f.beeps++ }
+func (f *fakeNotifier) Flash() { f.flashes++ }
+
+func TestNotifyTerminal(t *testing.T) {
+	cases := []struct {
+		event string
+		want  int
+	}{
+		{jobs.EventDone, 1}, {jobs.EventError, 1}, {jobs.EventCancelled, 1}, {jobs.EventProgress, 0}, {jobs.EventActivity, 0},
+	}
+	for _, c := range cases {
+		n := &fakeNotifier{}
+		notifyTerminal(c.event, n)
+		if n.beeps != c.want || n.flashes != c.want {
+			t.Errorf("%s: beeps %d flashes %d, want %d", c.event, n.beeps, n.flashes, c.want)
+		}
+	}
+}

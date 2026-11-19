@@ -60,6 +60,7 @@ type Manager struct {
 	em       Emitter
 	interval time.Duration
 	log      *slog.Logger
+	opts     Options
 
 	mu     sync.Mutex
 	id     string
@@ -116,9 +117,22 @@ func (m *Manager) published(id string, prog *extract.Progress, acts []extract.Ac
 	}
 }
 
+// Options ajusta el gestor.
+type Options struct {
+	// Begin corre al inicio de cada job, en el goroutine del job; la función que devuelve corre
+	// después del evento terminal, también si hubo panic o cancelación. nil = sin hook.
+	// La app lo usa para mantener el equipo despierto mientras dura la descarga.
+	Begin func() (end func())
+}
+
 // NewManager crea el gestor. interval es el mínimo entre eventos de progreso y de actividad.
 func NewManager(src source.MailSource, em Emitter, interval time.Duration, log *slog.Logger) *Manager {
-	return &Manager{src: src, em: em, interval: interval, log: log}
+	return NewManagerWith(src, em, interval, log, Options{})
+}
+
+// NewManagerWith crea el gestor con opciones.
+func NewManagerWith(src source.MailSource, em Emitter, interval time.Duration, log *slog.Logger, o Options) *Manager {
+	return &Manager{src: src, em: em, interval: interval, log: log, opts: o}
 }
 
 // Start valida la solicitud de forma síncrona, lanza el job en segundo plano y devuelve su id.
@@ -182,6 +196,10 @@ func (m *Manager) finish(term Terminal) {
 
 func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest, done chan struct{}) {
 	defer close(done)
+	if m.opts.Begin != nil {
+		end := m.opts.Begin()
+		defer end() // corre después del evento terminal y antes de cerrar done
+	}
 	sink := newThrottledSink(m.em, m.interval, func(p *extract.Progress, acts []extract.Activity) {
 		m.published(id, p, acts)
 	})

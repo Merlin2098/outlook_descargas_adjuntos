@@ -48,7 +48,7 @@ func main() {
 	app := NewApp(src, log, cfgDir, cfg)
 
 	err = wails.Run(&options.App{
-		Title:     "outlook_descargas_adjuntos",
+		Title:     appTitle,
 		Width:     cfg.WindowWidth,
 		Height:    cfg.WindowHeight,
 		MinWidth:  1100,

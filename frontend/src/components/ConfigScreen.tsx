@@ -193,6 +193,7 @@ export function ConfigScreen({form, onChange, onStarted}: Props) {
                 ? <span><span className="mono strong-number">{formatInt(selectedCount)}</span> {es.config.footer(selectedCount, form.includeSubfolders)}</span>
                 : <span className="hint">{invalid ?? form.folder?.path ?? ''}</span>}
             {!startError && selectedCount !== null && invalid && <span className="hint">{invalid}</span>}
+            {!startError && !invalid && <span className="hint">{es.config.keepAwake}</span>}
           </div>
           <div className="spacer"/>
           <button className="btn btn-primary" disabled={invalid !== null || starting} onClick={start}
