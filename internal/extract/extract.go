@@ -4,7 +4,6 @@ package extract
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -107,12 +106,12 @@ func Run(ctx context.Context, src source.MailSource, req domain.JobRequest, sink
 	r.emit(PhaseConnecting)
 
 	r.prog.Phase = PhaseScanning
-	if err := r.scanFolder(ctx, req.Folder, true); err != nil && !errors.Is(err, context.Canceled) {
-		return Result{Summary: r.sum, Records: r.recs}, fmt.Errorf("escanear %s: %w", req.Folder.Path, err)
-	}
+	r.scanFolder(ctx, req.Folder)
 
 	if ctx.Err() == nil {
 		r.download(ctx)
+	} else {
+		r.recordPending(0, 0)
 	}
 	if ctx.Err() != nil {
 		r.sum.Cancelled = true
@@ -161,8 +160,16 @@ func mailRecord(status domain.RecordStatus, reason, folder string, m domain.Mail
 		Subject: m.Subject, Sender: m.Sender, ReceivedAt: m.ReceivedAt}
 }
 
+// folderError registra que una carpeta no se pudo leer; el job sigue con las demás.
+func (r *runner) folderError(ref domain.FolderRef, err error) {
+	r.record(domain.RunRecord{Status: domain.StatusError, Reason: domain.ReasonFolderError, FolderPath: ref.Path,
+		Subject: err.Error()})
+	r.sink.Activity(Activity{At: r.now(), Kind: ActError, Name: ref.Path, Reason: domain.ReasonFolderError})
+}
+
 // scanFolder recorre la carpeta y, si se pidió, sus subcarpetas en profundidad.
-func (r *runner) scanFolder(ctx context.Context, ref domain.FolderRef, root bool) error {
+// Un error de carpeta se registra y no detiene el recorrido; solo la cancelación lo corta.
+func (r *runner) scanFolder(ctx context.Context, ref domain.FolderRef) {
 	before := 0
 	err := r.src.Scan(ctx, ref, func(it source.ScanItem) error {
 		if err := ctx.Err(); err != nil {
@@ -199,36 +206,49 @@ func (r *runner) scanFolder(ctx context.Context, ref domain.FolderRef, root bool
 		r.cands = append(r.cands, candidate{mail: it.Mail, folderPath: ref.Path, eligible: eligible})
 		return nil
 	})
+	if ctx.Err() != nil {
+		return
+	}
 	if err != nil {
-		return err
+		r.folderError(ref, err)
 	}
 	if !r.req.Filters.IncludeSubfolders {
-		return nil
+		return
 	}
 	kids, err := r.src.ListChildren(ctx, ref)
+	if ctx.Err() != nil {
+		return
+	}
 	if err != nil {
-		return err
+		r.folderError(ref, err)
+		return
 	}
 	for _, k := range kids {
-		if err := r.scanFolder(ctx, k.Ref, false); err != nil {
-			return err
+		r.scanFolder(ctx, k.Ref)
+		if ctx.Err() != nil {
+			return
 		}
 	}
-	return nil
 }
 
 func (r *runner) download(ctx context.Context) {
 	r.prog.MailsTotal = len(r.cands)
 	r.emit(PhaseDownloading)
-	for _, c := range r.cands {
+	for ci, c := range r.cands {
 		savedAny := false
-		for _, a := range c.eligible {
-			if ctx.Err() != nil {
+		for ai, a := range c.eligible {
+			saved, interrupted := false, ctx.Err() != nil
+			if !interrupted {
+				saved, interrupted = r.saveOne(ctx, c, a)
+			}
+			if interrupted {
+				if savedAny {
+					r.sum.MailsWithDownloads++
+				}
+				r.recordPending(ci, ai)
 				return
 			}
-			if r.saveOne(ctx, c, a) {
-				savedAny = true
-			}
+			savedAny = savedAny || saved
 			r.emit(PhaseDownloading)
 		}
 		if savedAny {
@@ -239,20 +259,35 @@ func (r *runner) download(ctx context.Context) {
 	}
 }
 
-// saveOne guarda un adjunto; devuelve true si quedó guardado.
-func (r *runner) saveOne(ctx context.Context, c candidate, a domain.Attachment) bool {
+// recordPending registra como omitidos por cancelación los adjuntos que no se llegaron a descargar,
+// desde el adjunto ai del candidato ci en adelante.
+func (r *runner) recordPending(ci, ai int) {
+	for ; ci < len(r.cands); ci++ {
+		c := r.cands[ci]
+		for ; ai < len(c.eligible); ai++ {
+			rec := mailRecord(domain.StatusSkipped, domain.ReasonCancelled, c.folderPath, c.mail)
+			rec.FileName = c.eligible[ai].FileName
+			r.record(rec)
+		}
+		ai = 0
+	}
+}
+
+// saveOne guarda un adjunto. saved indica si quedó guardado; interrupted, que se canceló a mitad
+// (en ese caso no se registra nada: lo registra recordPending).
+func (r *runner) saveOne(ctx context.Context, c candidate, a domain.Attachment) (saved, interrupted bool) {
 	subdir := ""
 	if r.req.Organize == domain.OrganizeByMonth {
 		subdir = c.mail.ReceivedAt.In(time.Local).Format("2006-01")
 	}
 	dir := filepath.Join(r.req.DestDir, subdir)
 	name := fsutil.SanitizeFileName(a.FileName)
-	fail := func(err error) bool {
+	fail := func(err error) (bool, bool) {
 		rec := mailRecord(domain.StatusError, err.Error(), c.folderPath, c.mail)
 		rec.FileName = a.FileName
 		r.record(rec)
 		r.sink.Activity(Activity{At: r.now(), Kind: ActError, Name: a.FileName, Subfolder: subdir, Reason: err.Error()})
-		return false
+		return false, false
 	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fail(err)
@@ -268,7 +303,7 @@ func (r *runner) saveOne(ctx context.Context, c candidate, a domain.Attachment) 
 	if err := r.src.SaveAttachment(ctx, c.mail.EntryID, a.Index, path); err != nil {
 		os.Remove(path)
 		if ctx.Err() != nil {
-			return false // cancelado: no es un error del adjunto
+			return false, true // cancelado: no es un error del adjunto
 		}
 		return fail(err)
 	}
@@ -288,5 +323,5 @@ func (r *runner) saveOne(ctx context.Context, c candidate, a domain.Attachment) 
 		kind = ActRenamed
 	}
 	r.sink.Activity(Activity{At: r.now(), Kind: kind, Name: final, Subfolder: subdir, Size: st.Size()})
-	return true
+	return true, false
 }

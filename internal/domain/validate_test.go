@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -67,5 +68,13 @@ func TestNormalizeExtensions(t *testing.T) {
 	want := []string{".pdf", ".xlsx", ".xml"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
+func TestValidateDestTooLong(t *testing.T) {
+	r := validReq(t)
+	r.DestDir = filepath.Join(r.DestDir, strings.Repeat("d", 230))
+	if err := r.Validate(); !errors.Is(err, ErrDestTooLong) {
+		t.Fatalf("Validate() = %v, want ErrDestTooLong", err)
 	}
 }

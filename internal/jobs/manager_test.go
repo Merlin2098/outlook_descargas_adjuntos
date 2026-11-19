@@ -209,15 +209,37 @@ func TestInvalidRequest(t *testing.T) {
 	m := NewManager(src, em, 20*time.Millisecond, quietLog())
 	req := facturasReq(t, src)
 	req.DestDir = ""
-	if _, err := m.Start(req); err != nil {
+	// La validación es síncrona: el error vuelve en Start y no se emite ningún evento,
+	// así la UI nunca recibe un terminal antes de conocer el jobID.
+	if _, err := m.Start(req); !errors.Is(err, domain.ErrNoDest) {
+		t.Fatalf("Start = %v, want ErrNoDest", err)
+	}
+	if len(em.snapshot()) != 0 || m.Running() {
+		t.Fatalf("eventos = %d, Running = %v", len(em.snapshot()), m.Running())
+	}
+}
+
+func TestWaitAfterCancel(t *testing.T) {
+	src := demoSrc()
+	em := newEmitter()
+	m := NewManager(src, em, 20*time.Millisecond, quietLog())
+	if !m.Wait(time.Second) {
+		t.Fatal("Wait sin job debería volver true de inmediato")
+	}
+	if _, err := m.Start(facturasReq(t, src)); err != nil {
 		t.Fatal(err)
 	}
-	term := em.waitTerminal(t)
-	if term.name != EventError || term.payload.(Terminal).Message != domain.ErrNoDest.Error() {
-		t.Fatalf("terminal = %s %+v", term.name, term.payload)
+	m.CancelActive()
+	if !m.Wait(5 * time.Second) {
+		t.Fatal("Wait no esperó al job cancelado")
 	}
-	if countTerminals(em.snapshot()) != 1 {
-		t.Fatal("más de un terminal")
+	evs := em.snapshot()
+	if countTerminals(evs) != 1 || evs[len(evs)-1].name != EventCancelled {
+		t.Fatal("al volver Wait, el terminal job:cancelled ya debe haberse emitido")
+	}
+	tp := evs[len(evs)-1].payload.(Terminal)
+	if _, err := os.Stat(tp.ReportPath); err != nil {
+		t.Fatalf("reporte parcial no escrito al volver Wait: %v", err)
 	}
 }
 

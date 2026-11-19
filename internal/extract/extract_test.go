@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"outlook_descargas_adjuntos/internal/domain"
+	"outlook_descargas_adjuntos/internal/source"
 	"outlook_descargas_adjuntos/internal/source/demo"
 )
 
@@ -236,5 +237,88 @@ func TestRunInvalidDest(t *testing.T) {
 		if p.Phase == PhaseScanning {
 			t.Fatal("escaneó con un destino inválido")
 		}
+	}
+}
+
+// failingSource falla al escanear la carpeta failPath y al listar los hijos de listFailPath.
+type failingSource struct {
+	*demo.Source
+	failPath     string
+	listFailPath string
+}
+
+func (f failingSource) Scan(ctx context.Context, ref domain.FolderRef, fn func(source.ScanItem) error) error {
+	if ref.EntryID == f.failPath {
+		return errors.New("acceso denegado (simulado)")
+	}
+	return f.Source.Scan(ctx, ref, fn)
+}
+
+func (f failingSource) ListChildren(ctx context.Context, ref domain.FolderRef) ([]domain.Folder, error) {
+	if ref.EntryID == f.listFailPath {
+		return nil, errors.New("no se pueden listar subcarpetas (simulado)")
+	}
+	return f.Source.ListChildren(ctx, ref)
+}
+
+func TestRunFolderErrorContinues(t *testing.T) {
+	base := demoSource()
+	proy := folderRef(t, base, "Proyectos")
+	src := failingSource{Source: base, failPath: proy.EntryID + `\Obra Norte`}
+	req := baseReq(t, proy)
+	req.Filters.IncludeSubfolders = true
+	res, err := Run(context.Background(), src, req, &captureSink{}, fixedNow)
+	if err != nil {
+		t.Fatalf("un error de carpeta abortó el job: %v", err)
+	}
+	if res.Summary.Scanned != 41 {
+		t.Fatalf("Scanned = %d, want 41 (Obra Sur)", res.Summary.Scanned)
+	}
+	if countReason(res.Records, domain.ReasonFolderError) != 1 {
+		t.Fatal("falta el registro del error de carpeta")
+	}
+	if _, err := os.Stat(res.ReportPath); err != nil {
+		t.Fatalf("no se escribió el reporte: %v", err)
+	}
+
+	src2 := failingSource{Source: base, listFailPath: proy.EntryID}
+	req.DestDir = t.TempDir()
+	res, err = Run(context.Background(), src2, req, &captureSink{}, fixedNow)
+	if err != nil || countReason(res.Records, domain.ReasonFolderError) != 1 {
+		t.Fatalf("ListChildren fallido: err=%v registros=%d", err, countReason(res.Records, domain.ReasonFolderError))
+	}
+}
+
+func TestRunCancelRecordsPending(t *testing.T) {
+	src := demoSource()
+	full, err := Run(context.Background(), src, baseReq(t, folderRef(t, src, "Facturas proveedores")), &captureSink{}, fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	saveErrs := func(recs []domain.RunRecord) int {
+		n := 0
+		for _, r := range recs {
+			if r.Status == domain.StatusError && r.Reason != domain.ReasonReadError {
+				n++
+			}
+		}
+		return n
+	}
+	totalEligible := full.Summary.Saved + saveErrs(full.Records)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	saved := 0
+	sink := &captureSink{onActivity: func(a Activity, _ int) {
+		if a.Kind == ActSaved || a.Kind == ActRenamed {
+			if saved++; saved == 5 {
+				cancel()
+			}
+		}
+	}}
+	res, _ := Run(ctx, src, baseReq(t, folderRef(t, src, "Facturas proveedores")), sink, fixedNow)
+	pending := countReason(res.Records, domain.ReasonCancelled)
+	if got := res.Summary.Saved + saveErrs(res.Records) + pending; got != totalEligible {
+		t.Fatalf("guardados+errores+pendientes = %d, want %d (pendientes=%d)", got, totalEligible, pending)
 	}
 }

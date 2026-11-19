@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// MaxDestLen es la longitud máxima de la carpeta de destino. Deja sitio para la subcarpeta YYYY-MM
+// y un nombre de archivo razonable dentro del límite de ruta de fsutil.MaxPath (240).
+const MaxDestLen = 200
+
 // Validate comprueba la solicitud. Crea el destino si no existe y verifica que se pueda escribir en él.
 func (r JobRequest) Validate() error {
 	if r.Folder.EntryID == "" {
@@ -14,6 +18,9 @@ func (r JobRequest) Validate() error {
 	}
 	if strings.TrimSpace(r.DestDir) == "" {
 		return ErrNoDest
+	}
+	if len([]rune(r.DestDir)) > MaxDestLen {
+		return ErrDestTooLong
 	}
 	if dateOnly(r.Filters.From).After(dateOnly(r.Filters.To)) {
 		return ErrBadRange

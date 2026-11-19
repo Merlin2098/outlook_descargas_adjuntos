@@ -49,9 +49,16 @@ func NewApp(src source.MailSource, log *slog.Logger, configDir string, cfg confi
 
 func (a *App) startup(ctx context.Context) { a.ctx = ctx }
 
+// shutdownWait es cuánto se espera, al cerrar, a que un job cancelado escriba su reporte parcial.
+const shutdownWait = 5 * time.Second
+
 func (a *App) shutdown(context.Context) {
-	if a.jobs != nil {
-		a.jobs.CancelActive()
+	if a.jobs == nil {
+		return
+	}
+	a.jobs.CancelActive()
+	if !a.jobs.Wait(shutdownWait) {
+		a.log.Warn("el job no terminó a tiempo al cerrar la app")
 	}
 }
 

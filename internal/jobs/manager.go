@@ -55,6 +55,7 @@ type Manager struct {
 	mu     sync.Mutex
 	id     string
 	cancel context.CancelFunc
+	done   chan struct{} // se cierra después del evento terminal del último job
 }
 
 // NewManager crea el gestor. interval es el mínimo entre eventos de progreso y de actividad.
@@ -62,17 +63,23 @@ func NewManager(src source.MailSource, em Emitter, interval time.Duration, log *
 	return &Manager{src: src, em: em, interval: interval, log: log}
 }
 
-// Start lanza el job en segundo plano y devuelve su id de inmediato.
+// Start valida la solicitud de forma síncrona, lanza el job en segundo plano y devuelve su id.
+// Si la validación falla, el error vuelve aquí y no se emite ningún evento: así la UI nunca
+// recibe un evento terminal de un job cuyo id todavía no conoce.
 func (m *Manager) Start(req domain.JobRequest) (string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.cancel != nil {
 		return "", ErrJobRunning
 	}
+	if err := req.Validate(); err != nil {
+		return "", err
+	}
 	id := newID()
 	ctx, cancel := context.WithCancel(context.Background())
-	m.id, m.cancel = id, cancel
-	go m.run(ctx, id, req)
+	done := make(chan struct{})
+	m.id, m.cancel, m.done = id, cancel, done
+	go m.run(ctx, id, req, done)
 	return id, nil
 }
 
@@ -112,7 +119,8 @@ func (m *Manager) finish() {
 	m.id, m.cancel = "", nil
 }
 
-func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest) {
+func (m *Manager) run(ctx context.Context, id string, req domain.JobRequest, done chan struct{}) {
+	defer close(done)
 	sink := newThrottledSink(m.em, m.interval)
 	log := m.log.With("job", id)
 	log.Info("job iniciado", "carpeta", req.Folder.Path, "destino", req.DestDir)
@@ -213,4 +221,21 @@ func (s *throttledSink) close() {
 	close(s.stop)
 	<-s.done
 	s.flush()
+}
+
+// Wait espera a que termine el job en curso (incluido su evento terminal y su reporte).
+// Devuelve false si se agota timeout. Sin job en curso vuelve true de inmediato.
+func (m *Manager) Wait(timeout time.Duration) bool {
+	m.mu.Lock()
+	done := m.done
+	m.mu.Unlock()
+	if done == nil {
+		return true
+	}
+	select {
+	case <-done:
+		return true
+	case <-time.After(timeout):
+		return false
+	}
 }
