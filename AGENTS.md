@@ -94,8 +94,12 @@ Regla de dependencias: `domain` no importa nada externo. `extract` depende de la
 ```bash
 # "wails" = .tools/wails.exe (v2.17.1, fijado para este proyecto)
 .tools/wails.exe dev -appargs "--demo"     # desarrollo con la fuente simulada (sin Outlook)
+.tools/wails.exe dev                       # contra Outlook Classic real (validación local; no grabar)
 .tools/wails.exe build -clean -trimpath    # binario de release en build/bin/
 go test ./...                   # tests (deben pasar sin Outlook instalado)
+go test -tags integration ./internal/outlook/ -v   # contra Outlook real: lo corre el usuario
+go run ./cmd/spike-outlook -n 10000                # mide el recorrido COM: lo corre el usuario
+# checklist manual: docs/validacion-outlook.md
 go vet ./...
 gofmt -l . && goimports -l .    # sin salida = formateado
 cd frontend && npm test         # tests de la lógica del frontend (Vitest, src/lib/*.test.ts)

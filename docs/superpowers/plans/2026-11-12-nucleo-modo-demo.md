@@ -23,7 +23,7 @@ exactamente un evento terminal. `app.go` (paquete `main`) solo traduce DTOs y de
 | --- | --- |
 | **1 (este)** | Núcleo + fuente demo + jobs/eventos + reporte + bindings + pantalla de humo |
 | 2 ✅ | UI React según `docs/diseno/mock-ui/` (tokens CSS, `i18n/es.ts`, 3 pantallas, árbol asíncrono) |
-| 3 | Adaptador COM de Outlook (`internal/outlook`), `internal/winapi` (suspensión, beep, flash), checklist de validación local |
+| 3 ✅ | Adaptador COM de Outlook (`internal/outlook`), `internal/winapi` (suspensión, beep, flash), checklist de validación local |
 | 4 | Portafolio: README en español, CI en GitHub Actions, release y grabación del video |
 
 ## Restricciones globales

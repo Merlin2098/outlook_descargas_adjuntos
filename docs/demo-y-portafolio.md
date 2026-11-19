@@ -32,7 +32,7 @@ Nunca se graba un buzón real. El video usa solo la fuente demo (§2.1); Outlook
 **Decisión: el video se graba en modo demo.** La conexión con Outlook real se valida localmente,
 sin grabarla y sin publicar ningún resultado:
 
-- Checklist manual (`docs/validacion-outlook.md`, por crear): listar cuentas y carpetas, extraer un
+- Checklist manual ([validacion-outlook.md](validacion-outlook.md)): listar cuentas y carpetas, extraer un
   rango corto, cancelar a mitad del job, revisar el reporte y medir tiempo y memoria en una carpeta grande.
 - Tests `//go:build windows && integration` para el adaptador COM.
 - El PST demo deja de ser necesario. Solo se haría si más adelante se quiere un benchmark reproducible.
