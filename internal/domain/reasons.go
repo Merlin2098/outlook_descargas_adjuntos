@@ -29,3 +29,6 @@ var (
 	ErrNothingToOpen   = errors.New("No hay una carpeta de destino que abrir")
 	ErrNoReport        = errors.New("No hay un reporte que abrir")
 )
+
+// ErrOutlookUnavailable indica que no se pudo conectar con Outlook Classic por COM.
+var ErrOutlookUnavailable = errors.New("No se pudo conectar con Outlook Classic. Ábrelo e inténtalo de nuevo, o ejecuta la app con --demo") //nolint:staticcheck // texto visible
