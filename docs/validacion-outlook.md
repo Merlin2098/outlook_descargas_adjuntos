@@ -40,6 +40,8 @@ go run ./cmd/spike-outlook -n 10000 -folder "cuenta\Carpeta grande"
 - [ ] Extraer el mismo rango en modo **plano** en otra carpeta de destino.
 - [ ] Repetir sobre el mismo destino: los duplicados se renombran con `_1`, `_2`… y nada se sobrescribe.
 - [ ] El filtro de extensiones (`pdf, xlsx`) solo guarda esas extensiones.
+- [ ] En un buzón Exchange, el filtro "remitente contiene" con la dirección SMTP de un remitente **interno** lo encuentra, y el reporte muestra su dirección SMTP (no un `/O=…/CN=…`).
+- [ ] Cerrar la app mientras Outlook muestra un diálogo modal no deja el proceso colgado (termina en unos segundos).
 - [ ] Con "Omitir imágenes inline", las imágenes de firma (`image001.png`) no se guardan y aparecen como "Solo imágenes inline".
 - [ ] Un correo con otro correo adjunto guarda el adjunto como `.msg`.
 - [ ] Un adjunto bloqueado por Outlook (por ejemplo, `.exe`) queda como error en el reporte y el job sigue.

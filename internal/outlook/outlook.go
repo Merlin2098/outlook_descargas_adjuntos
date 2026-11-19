@@ -20,6 +20,7 @@ import (
 const (
 	propAttachmentHidden = "http://schemas.microsoft.com/mapi/proptag/0x7FFE000B" // PR_ATTACHMENT_HIDDEN
 	propAttachContentID  = "http://schemas.microsoft.com/mapi/proptag/0x3712001F" // PR_ATTACH_CONTENT_ID
+	propSenderSMTP       = "http://schemas.microsoft.com/mapi/proptag/0x5D01001F" // PR_SENDER_SMTP_ADDRESS
 )
 
 // Códigos HRESULT que indican que Outlook se cerró o dejó de responder: se reconecta en la próxima llamada.
@@ -284,6 +285,9 @@ func (s *Source) readItem(it *ole.IDispatch, storeID string) source.ScanItem {
 	m.IsMail = true
 	name, _ := getString(it, "SenderName")
 	addr, _ := getString(it, "SenderEmailAddress")
+	if typ, _ := getString(it, "SenderEmailType"); strings.EqualFold(typ, "EX") {
+		addr = senderAddress(typ, addr, exchangeSMTP(it))
+	}
 	m.Sender = senderText(name, addr)
 	if m.Attachments, err = readAttachments(it); err != nil {
 		return source.ScanItem{Mail: m, Err: s.checkConn(err)}
@@ -374,6 +378,37 @@ func inlineProps(a *ole.IDispatch) (hidden bool, contentID string) {
 		_ = v.Clear()
 	}
 	return hidden, contentID
+}
+
+// exchangeSMTP obtiene la dirección SMTP de un remitente de Exchange: primero PR_SENDER_SMTP_ADDRESS
+// y, si no está, Sender.GetExchangeUser().PrimarySmtpAddress. Devuelve "" si no la encuentra.
+func exchangeSMTP(it *ole.IDispatch) string {
+	if pa, err := getObj(it, "PropertyAccessor"); err == nil {
+		v, err := oleutil.CallMethod(pa, "GetProperty", propSenderSMTP)
+		release(pa)
+		if err == nil {
+			smtp := ""
+			if v.VT == ole.VT_BSTR {
+				smtp = strings.TrimSpace(v.ToString())
+			}
+			_ = v.Clear()
+			if smtp != "" {
+				return smtp
+			}
+		}
+	}
+	sender, err := getObj(it, "Sender")
+	if err != nil {
+		return ""
+	}
+	defer release(sender)
+	user, err := callMaybeObj(sender, "GetExchangeUser")
+	if err != nil || user == nil {
+		return ""
+	}
+	defer release(user)
+	smtp, _ := getString(user, "PrimarySmtpAddress")
+	return strings.TrimSpace(smtp)
 }
 
 // callMaybeObj llama un método que devuelve un objeto o nada (GetFirst/GetNext al final).

@@ -92,6 +92,15 @@ func senderText(name, address string) string {
 	}
 }
 
+// senderAddress elige la dirección a mostrar. En Exchange (SenderEmailType "EX") SenderEmailAddress
+// es un DN X.500 (/O=…/CN=…); si se conoce la SMTP, se usa esa para que el filtro por dirección funcione.
+func senderAddress(emailType, address, smtp string) string {
+	if strings.EqualFold(emailType, "EX") && smtp != "" {
+		return smtp
+	}
+	return address
+}
+
 // folderPath quita las barras iniciales de Folder.FolderPath ("\cuenta\Bandeja").
 func folderPath(p string) string { return strings.TrimLeft(p, `\`) }
 

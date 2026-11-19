@@ -145,3 +145,19 @@ func TestOleDateDST(t *testing.T) {
 		}
 	}
 }
+
+func TestSenderAddress(t *testing.T) {
+	const dn = "/O=EXCHANGELABS/OU=EXCHANGE ADMINISTRATIVE GROUP/CN=RECIPIENTS/CN=ANA"
+	cases := []struct{ emailType, address, smtp, want string }{
+		{"EX", dn, "ana@x.example", "ana@x.example"},
+		{"ex", dn, "ana@x.example", "ana@x.example"},
+		{"EX", dn, "", dn},
+		{"SMTP", "ana@x.example", "otra@x.example", "ana@x.example"},
+		{"", "ana@x.example", "", "ana@x.example"},
+	}
+	for _, c := range cases {
+		if got := senderAddress(c.emailType, c.address, c.smtp); got != c.want {
+			t.Errorf("senderAddress(%q,%q,%q) = %q, want %q", c.emailType, c.address, c.smtp, got, c.want)
+		}
+	}
+}
