@@ -56,11 +56,12 @@ function App() {
     <div className="app">
       <TitleBar status={status} busy={busy} onCancelJob={cancel}/>
       <div className="app-body">
-        {job.status === 'idle' && (
+        {/* Configurar queda montada (oculta) para conservar el árbol y el formulario al volver. */}
+        <div className="screen" hidden={job.status !== 'idle'}>
           <ConfigScreen form={form} onChange={setForm} onStarted={(id) => start(id, form)}/>
-        )}
-        {busy && <ProgressScreen job={job} onCancel={cancel}/>}
-        {!busy && job.status !== 'idle' && <SummaryScreen job={job} onNew={restart}/>}
+        </div>
+        {busy && <div className="screen"><ProgressScreen job={job} onCancel={cancel}/></div>}
+        {!busy && job.status !== 'idle' && <div className="screen"><SummaryScreen job={job} onNew={restart}/></div>}
       </div>
     </div>
   )
