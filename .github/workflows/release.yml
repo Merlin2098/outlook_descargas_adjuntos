@@ -37,6 +37,17 @@ jobs:
       - name: Wails CLI v2.17.1
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.1
 
+      - name: Versión de los metadatos del .exe desde el tag
+        shell: bash
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            const cfg = JSON.parse(fs.readFileSync("wails.json", "utf8"));
+            cfg.info.productVersion = v;
+            fs.writeFileSync("wails.json", JSON.stringify(cfg, null, 2) + "\n");
+          '
+
       - name: Compilar
         shell: bash
         run: wails build -clean -trimpath -ldflags "-X main.appVersion=${GITHUB_REF_NAME#v}"

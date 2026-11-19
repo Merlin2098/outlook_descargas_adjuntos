@@ -24,6 +24,10 @@
   --muted-ink: #94A3B8;
   --ink-strong: #0F172A;
   --on-primary: #FFFFFF;
+  --on-primary-muted: #E0F2FE;
+  --progress-from: #0284C7;
+  --progress-to: #0369A1;
+  --progress-text: #0F172A;
   --success-soft: #ECFDF5;
   --success-border: #A7F3D0;
   --success-ink: #065F46;
@@ -73,6 +77,11 @@
   --muted-ink: #64748B;
   --ink-strong: #E2E8F0;
   --on-primary: #0D0F22;
+  --on-primary-muted: #082F49;
+  /* El relleno de la barra se oscurece para que el porcentaje claro se lea encima (AA). */
+  --progress-from: #0369A1;
+  --progress-to: #075985;
+  --progress-text: #E2E8F0;
   --success-soft: rgba(34, 197, 94, 0.12);
   --success-border: rgba(34, 197, 94, 0.35);
   --success-ink: #86EFAC;

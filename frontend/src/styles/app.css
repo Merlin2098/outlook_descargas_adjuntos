@@ -120,7 +120,7 @@ h1, h2, p { margin: 0; }
 }
 .tree-row:hover { background: rgba(2, 132, 199, 0.1); }
 .tree-row.selected { background: var(--primary-strong); color: var(--on-primary); font-weight: 600; }
-.tree-row.selected .tree-count { color: var(--primary-soft); }
+.tree-row.selected .tree-count { color: var(--on-primary-muted); }
 .tree-chevron {
   width: 14px; height: 14px; flex: none; padding: 0; border: 0; background: transparent; color: var(--text-2);
   display: inline-flex; align-items: center; justify-content: center;
@@ -223,14 +223,14 @@ h1, h2, p { margin: 0; }
 }
 .progress-fill {
   position: absolute; top: 0; bottom: 0; left: 0; border-radius: 2px; overflow: hidden;
-  background: linear-gradient(90deg, var(--primary), var(--primary-strong)); transition: width 0.25s ease-out;
+  background: linear-gradient(90deg, var(--progress-from), var(--progress-to)); transition: width 0.25s ease-out;
 }
 .progress-bar.indeterminate .progress-fill { width: 30%; animation: indeterminate 1.4s ease-in-out infinite; }
 .progress-sweep {
   position: absolute; top: 0; bottom: 0; width: 40%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent); animation: sweep 1.8s linear infinite;
 }
-.progress-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--ink-strong); }
+.progress-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--progress-text); }
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .stat {
   padding: 8px 12px; border-radius: var(--radius-control); background: var(--bg); border: 1px solid var(--border-soft);
