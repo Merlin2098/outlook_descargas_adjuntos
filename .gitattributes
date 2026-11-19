@@ -1,4 +1,4 @@
-# LF en el repo y en el checkout, también en Windows: gofmt exige LF y la CI corre en windows-latest.
+# LF en el repo y en el checkout, también en Windows: gofmt exige LF.
 * text=auto eol=lf
 *.png binary
 *.ico binary

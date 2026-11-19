@@ -8,4 +8,4 @@ Recursos de compilación de Wails.
 - `windows/wails.exe.manifest`: manifiesto de la aplicación.
 - `bin/`: salida de `wails build` (ignorada por git).
 
-La versión del binario se inyecta al compilar: `wails build -ldflags "-X main.appVersion=X.Y.Z"` (lo hace la release a partir del tag).
+La versión del binario se inyecta al compilar: `wails build -ldflags "-X main.appVersion=X.Y.Z"`.

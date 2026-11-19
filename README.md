@@ -4,8 +4,6 @@ App de escritorio para Windows que descarga en bloque los adjuntos de una carpet
 con progreso en vivo, cancelación y un reporte Excel de lo que pasó con cada correo. Hecha con
 **Go + Wails v2 + React (TypeScript)**.
 
-[![CI](https://github.com/Merlin2098/outlook_descargas_adjuntos/actions/workflows/ci.yml/badge.svg)](https://github.com/Merlin2098/outlook_descargas_adjuntos/actions/workflows/ci.yml)
-
 ![Pantalla de configuración en modo demo](docs/img/configurar.png)
 
 ## Qué hace
@@ -27,16 +25,16 @@ con progreso en vivo, cancelación y un reporte Excel de lo que pasó con cada c
 
 Requisitos: Windows 10 u 11 con WebView2 (viene con Windows 11 y con Edge).
 
-- **Con la release:** descarga `outlook_descargas_adjuntos.exe` de la [página de Releases](https://github.com/Merlin2098/outlook_descargas_adjuntos/releases) y ejecútalo con
-  `outlook_descargas_adjuntos.exe --demo`. El ejecutable no está firmado: SmartScreen puede pedirte confirmar
-  ("Más información" → "Ejecutar de todas formas").
-- **Desde el código:** con Go 1.26+, Node 24 y el CLI de Wails v2.17.1:
+Con Go 1.26+, Node 24 y el CLI de Wails v2.17.1:
 
-  ```bash
-  go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.1
-  wails dev -appargs "--demo"      # desarrollo con la fuente simulada
-  wails build -clean -trimpath     # binario en build/bin/
-  ```
+```bash
+go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.1
+wails dev -appargs "--demo"      # desarrollo con la fuente simulada
+wails build -clean -trimpath     # binario en build/bin/
+build/bin/outlook_descargas_adjuntos.exe --demo
+```
+
+El ejecutable no está firmado: SmartScreen puede pedir confirmación ("Más información" → "Ejecutar de todas formas").
 
 Sin `--demo`, la app se conecta al Outlook Classic del equipo.
 
@@ -108,14 +106,12 @@ go vet ./... && go vet -tags integration ./...
 - `extract`, `report`, `jobs` y el saneamiento de nombres tienen tests de tabla con inyección de errores.
 - El adaptador COM se prueba con objetos COM del sistema (`Scripting.Dictionary`) para verificar que no fuga referencias, y el STA se prueba con cancelación, paradas, panics y cierre.
 - Contra Outlook real hay tests de integración (`//go:build windows && integration`) y un checklist manual en
-  [docs/validacion-outlook.md](docs/validacion-outlook.md). Se corren en local, nunca en la CI:
+  [docs/validacion-outlook.md](docs/validacion-outlook.md). Se corren solo en local:
 
   ```bash
   go test -tags integration ./internal/outlook/ -v
   go run ./cmd/spike-outlook -n 10000      # mide el recorrido COM; solo imprime conteos
   ```
-
-La CI corre en `windows-latest` con los mismos comandos ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
 ## Rewrite desde Python
 
@@ -152,7 +148,7 @@ validación local con Outlook real. Este README no publica números estimados.
   Outlook (Object Model Guard) si no hay un antivirus reconocido.
 - Los adjuntos de los correos fuera del rango de fechas también se leen al escanear (para listar su nombre y
   tipo). Optimizarlo requiere cambiar la interfaz `MailSource` y se hará solo si el benchmark lo justifica.
-- El ejecutable de la release no está firmado: SmartScreen puede pedir confirmación.
+- El ejecutable no está firmado: SmartScreen puede pedir confirmación.
 
 ## Licencia
 

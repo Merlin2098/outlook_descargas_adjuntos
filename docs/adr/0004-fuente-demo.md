@@ -4,8 +4,8 @@
 
 ## Contexto
 
-No se puede grabar ni publicar nada de un buzón real, los tests tienen que correr sin Outlook (también en la
-CI) y la UI necesita datos con volumen y errores realistas para desarrollarse y para el video.
+No se puede grabar ni publicar nada de un buzón real, los tests tienen que correr sin Outlook (en cualquier
+equipo) y la UI necesita datos con volumen y errores realistas para desarrollarse y para el video.
 
 ## Decisión
 
