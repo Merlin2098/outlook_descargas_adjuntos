@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Descarga en curso</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e2e8f0}
+*{box-sizing:border-box}
+a{color:#0369a1}a:hover{color:#075985}
+.mono{font-family:'Fira Code',Consolas,monospace;font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+.sweep{animation:sweep 1.8s cubic-bezier(.4,0,.2,1) infinite}
+@media (prefers-reduced-motion: reduce){.pulse,.sweep{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; display: flex; flex-direction: column; background: #f8fafc; color: #1e293b; font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 13px; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 8px">
+
+  <!-- Barra de título -->
+  <div style="height: 40px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 0 0 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0">
+    <div style="width: 20px; height: 20px; border-radius: 4px; background: {{primary}}; display: flex; align-items: center; justify-content: center">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="m7 10 5 5 5-5"></path><path d="M5 20h14"></path></svg>
+    </div>
+    <span class="mono" style="font-size: 12.5px; color: #1e293b; font-weight: 500">outlook_descargas_adjuntos</span>
+    <span class="mono" style="font-size: 11px; color: #64748b">v0.1.0</span>
+    <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 4px; border: 1px dashed #8b5cf6; background: #f5f3ff; color: #6d28d9; font-size: 11px; font-weight: 600; letter-spacing: 0.06em">MODO DEMO · datos simulados</span>
+    <div style="flex: 1"></div>
+    <span class="mono" style="font-size: 12px; color: #475569; padding-right: 8px">63 % · descargando</span>
+    <div style="display: flex; height: 40px">
+      <button aria-label="Minimizar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h10" stroke="currentColor" stroke-width="1.2"></path></svg></button>
+      <button aria-label="Maximizar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" stroke-width="1.2"></rect></svg></button>
+      <button aria-label="Cerrar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+
+    <!-- Parámetros bloqueados -->
+    <aside style="width: 300px; flex: none; display: flex; flex-direction: column; gap: 16px; padding: 18px; background: #ffffff; border-right: 1px solid #e2e8f0">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+        <span style="font-size: 16px; font-weight: 600; color: #0369a1">Parámetros del job</span>
+      </div>
+      <dl style="margin: 0; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 3px"><dt style="font-size: 12px; color: #475569; font-weight: 500">Origen</dt><dd class="mono" style="margin: 0; font-size: 12px">demo@example.com\<br>Facturas proveedores</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 3px"><dt style="font-size: 12px; color: #475569; font-weight: 500">Rango</dt><dd class="mono" style="margin: 0; font-size: 12px">01/08/2026 → 31/10/2026</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 3px"><dt style="font-size: 12px; color: #475569; font-weight: 500">Filtros</dt><dd class="mono" style="margin: 0; font-size: 12px">asunto contiene "factura"<br>.pdf .xlsx .xml · sin inline</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 3px"><dt style="font-size: 12px; color: #475569; font-weight: 500">Destino</dt><dd class="mono" style="margin: 0; font-size: 12px; word-break: break-all">C:\Users\demo\Descargas\adjuntos_q3\ · por mes</dd></div>
+      </dl>
+      <div style="flex: 1"></div>
+      <div style="padding: 10px 12px; border-radius: 4px; background: #ecfeff; border: 1px solid #a5f3fc; display: flex; gap: 10px; align-items: flex-start">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0e7490" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        <span style="font-size: 12px; color: #155e75; line-height: 1.45">Suspensión del equipo bloqueada hasta que termine el job.</span>
+      </div>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="flex: 1; padding: 22px 32px 0; display: flex; flex-direction: column; gap: 16px; min-height: 0">
+
+        <!-- Fases -->
+        <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+          <li style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0">
+            <span style="width: 22px; height: 22px; border-radius: 999px; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg></span>
+            <span style="display: flex; flex-direction: column"><span style="font-weight: 500">Conectar</span><span class="mono" style="font-size: 11px; color: #64748b">0,4 s</span></span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0">
+            <span style="width: 22px; height: 22px; border-radius: 999px; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg></span>
+            <span style="display: flex; flex-direction: column"><span style="font-weight: 500">Escanear correos</span><span class="mono" style="font-size: 11px; color: #64748b">312 en rango · 6,1 s</span></span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; background: #e0f2fe; border: 2px solid #0284c7">
+            <span class="pulse" style="width: 22px; height: 22px; border-radius: 999px; background: {{primary}}; display: flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 999px; background: #ffffff"></span></span>
+            <span style="display: flex; flex-direction: column"><span style="font-weight: 600; color: #075985">Descargar adjuntos</span><span class="mono" style="font-size: 11px; color: #0369a1">en curso</span></span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; border: 1px dashed #cbd5e1">
+            <span style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #cbd5e1"></span>
+            <span style="display: flex; flex-direction: column"><span style="color: #475569; font-weight: 500">Generar reporte</span><span class="mono" style="font-size: 11px; color: #64748b">pendiente</span></span>
+          </li>
+        </ol>
+
+        <!-- Progreso principal -->
+        <section style="padding: 16px 18px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: baseline; gap: 12px">
+            <span class="mono" style="font-size: 44px; font-weight: 500; letter-spacing: -0.03em; line-height: 1; color: #0369a1">198<span style="color: #94a3b8">/312</span></span>
+            <span style="font-size: 14px; color: #475569">correos procesados</span>
+            <div style="flex: 1"></div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px">
+              <span class="mono" style="font-size: 18px">01:36</span>
+              <span style="font-size: 12px; color: #64748b">restante ≈ <span class="mono">00:55</span></span>
+            </div>
+          </div>
+          <div role="progressbar" aria-label="Progreso de la descarga" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100" style="position: relative; height: 24px; border-radius: 4px; background: #f1f5f9; border: 2px solid #cbd5e1; overflow: hidden">
+            <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 63%; border-radius: 2px; background: linear-gradient(90deg, #0284c7, {{primary}}); overflow: hidden">
+              <div class="sweep" style="position: absolute; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)"></div>
+            </div>
+            <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #0f172a">63 %</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+            <div style="padding: 8px 12px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #475569">Adjuntos guardados</span><span class="mono" style="font-size: 20px; font-weight: 500">412</span></div>
+            <div style="padding: 8px 12px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #475569">Tamaño en disco</span><span class="mono" style="font-size: 20px; font-weight: 500">181,2 <span style="font-size: 12px; color: #475569">MB</span></span></div>
+            <div style="padding: 8px 12px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #475569">Omitidos</span><span class="mono" style="font-size: 20px; font-weight: 500; color: #b45309">15</span></div>
+            <div style="padding: 8px 12px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #475569">Errores</span><span class="mono" style="font-size: 20px; font-weight: 500; color: #dc2626">1</span></div>
+          </div>
+        </section>
+
+        <!-- Consola de actividad (estilo QTextEdit original) -->
+        <section style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span class="pulse" style="width: 7px; height: 7px; border-radius: 999px; background: #10b981"></span>
+            <h2 style="margin: 0; font-size: 14px; font-weight: 600">Actividad en vivo</h2>
+          </div>
+          <div class="mono" style="flex: 1; min-height: 0; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; background: #f8fafc; border: 2px solid #94a3b8; border-radius: 8px; overflow: hidden">
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:11</span><span style="color: #047857">↓</span><span style="color: #1e293b">factura_F001-00218.pdf</span><span style="text-align: right">284 KB</span><span>2026-09\</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:11</span><span style="color: #047857">↓</span><span style="color: #1e293b">factura_F001-00218.xml</span><span style="text-align: right">12 KB</span><span>2026-09\</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:12</span><span style="color: #b45309">–</span><span style="color: #b45309">Re: consulta de pago · sin adjuntos que coincidan</span><span style="text-align: right">—</span><span style="color: #b45309">omitido</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:12</span><span style="color: #047857">↓</span><span style="color: #1e293b">estado_cuenta_septiembre.xlsx</span><span style="text-align: right">96 KB</span><span>2026-09\</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:13</span><span style="color: #dc2626">!</span><span style="color: #dc2626">factura_F002-00…(nombre muy largo).pdf · ruta &gt; 260</span><span style="text-align: right">—</span><span style="color: #dc2626">error</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:13</span><span style="color: #047857">↓</span><span style="color: #1e293b">factura_F001-00223.pdf</span><span style="text-align: right">301 KB</span><span>2026-10\</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #64748b"><span>10:42:14</span><span style="color: #047857">↓</span><span style="color: #1e293b">factura_F001-00223_1.pdf <span style="color: #64748b">(duplicado renombrado)</span></span><span style="text-align: right">301 KB</span><span>2026-10\</span></div>
+            <div style="display: grid; grid-template-columns: 66px 16px minmax(0, 1fr) 72px 70px; gap: 10px; color: #075985; background: #e0f2fe; margin: 0 -6px; padding: 2px 6px; border-radius: 3px"><span>10:42:14</span><span>↓</span><span style="font-weight: 500">nota_credito_NC01-0042.pdf</span><span style="text-align: right">158 KB</span><span>2026-10\</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div style="height: 72px; flex: none; margin-top: 16px; padding: 0 32px; display: flex; align-items: center; gap: 16px; border-top: 1px solid #e2e8f0; background: #ffffff">
+        <span style="font-size: 13px; color: #475569">Puedes minimizar la ventana: te avisaremos con un sonido al terminar.</span>
+        <div style="flex: 1"></div>
+        <button style="height: 42px; padding: 0 20px; border-radius: 4px; border: 2px solid #dc2626; background: transparent; color: #dc2626; font-size: 13px; font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 8px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+          Cancelar descarga
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0369a1","options":["#0369a1","#0284c7","#16a085"]},"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { primary: this.props.primary ?? '#0369a1' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+build/bin
+node_modules
+frontend/dist
+
+# proyecto
+Outlook_AttachExtractor_Rework/
+_scaffold/
+*.log
+.superpowers/

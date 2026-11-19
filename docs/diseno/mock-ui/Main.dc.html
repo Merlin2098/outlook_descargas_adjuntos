@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Configurar descarga</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e2e8f0}
+*{box-sizing:border-box}
+a{color:#0369a1}a:hover{color:#075985}
+.mono{font-family:'Fira Code',Consolas,monospace;font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; display: flex; flex-direction: column; background: #f8fafc; color: #1e293b; font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 13px; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 8px">
+
+  <!-- Barra de título (Wails frameless) -->
+  <div style="height: 40px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 0 0 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0">
+    <div style="width: 20px; height: 20px; border-radius: 4px; background: {{primary}}; display: flex; align-items: center; justify-content: center">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="m7 10 5 5 5-5"></path><path d="M5 20h14"></path></svg>
+    </div>
+    <span class="mono" style="font-size: 12.5px; color: #1e293b; font-weight: 500">outlook_descargas_adjuntos</span>
+    <span class="mono" style="font-size: 11px; color: #64748b">v0.1.0</span>
+    <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 4px; border: 1px dashed #8b5cf6; background: #f5f3ff; color: #6d28d9; font-size: 11px; font-weight: 600; letter-spacing: 0.06em">MODO DEMO · datos simulados</span>
+    <div style="flex: 1"></div>
+    <div style="display: flex; height: 40px">
+      <button aria-label="Minimizar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h10" stroke="currentColor" stroke-width="1.2"></path></svg></button>
+      <button aria-label="Maximizar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" stroke-width="1.2"></rect></svg></button>
+      <button aria-label="Cerrar" style="width: 46px; height: 40px; border: 0; background: transparent; color: #475569; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+
+    <!-- Panel de origen -->
+    <aside style="width: 300px; flex: none; display: flex; flex-direction: column; background: #ffffff; border-right: 1px solid #e2e8f0">
+      <div style="padding: 18px 18px 10px; display: flex; align-items: center; justify-content: space-between">
+        <span style="font-size: 16px; font-weight: 600; color: #0369a1">Bandeja de correo</span>
+        <button aria-label="Recargar carpetas" style="width: 30px; height: 30px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff; color: #0369a1; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg></button>
+      </div>
+
+      <div style="margin: 0 14px; flex: 1; padding: 6px; border: 2px solid #cbd5e1; border-radius: 4px; display: flex; flex-direction: column; gap: 1px">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 6px; font-weight: 600">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+          <span>demo@example.com</span>
+        </div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 36px; border-radius: 3px"><span style="flex: 1">Bandeja de entrada</span><span class="mono" style="font-size: 11.5px; color: #64748b">1.248</span></div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 36px; border-radius: 3px"><span style="flex: 1">Elementos enviados</span><span class="mono" style="font-size: 11.5px; color: #64748b">402</span></div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 36px; border-radius: 3px; background: #0369a1; color: #ffffff; font-weight: 600"><span style="flex: 1">Facturas proveedores</span><span class="mono" style="font-size: 11.5px; color: #e0f2fe">312</span></div>
+        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 8px 6px 20px; border-radius: 3px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          <span style="flex: 1">Proyectos</span>
+        </div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 56px; border-radius: 3px; background: rgba(2,132,199,0.1)"><span style="flex: 1">Obra Norte</span><span class="mono" style="font-size: 11.5px; color: #64748b">86</span></div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 56px; border-radius: 3px"><span style="flex: 1">Obra Sur</span><span class="mono" style="font-size: 11.5px; color: #64748b">41</span></div>
+        <div style="display: flex; align-items: center; padding: 6px 8px 6px 36px; border-radius: 3px"><span style="flex: 1">Archivo 2025</span><span class="mono" style="font-size: 11.5px; color: #64748b">2.910</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 6px; margin-top: 8px; font-weight: 600">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path></svg>
+          <span>Archivo local (PST)</span>
+        </div>
+      </div>
+
+      <div class="mono" style="margin: 12px 14px 14px; padding: 10px; background: #f8fafc; border: 2px solid #0284c7; border-radius: 4px; font-size: 11px; color: #1e293b; line-height: 1.5">Ruta seleccionada: demo@example.com\Facturas proveedores</div>
+    </aside>
+
+    <!-- Configuración -->
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="flex: 1; padding: 24px 32px 0; display: flex; flex-direction: column; gap: 18px; min-height: 0">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #0369a1">Nueva descarga</h1>
+          <p style="margin: 0; color: #475569; font-size: 13px">Descarga en bloque los adjuntos de una carpeta de Outlook a tu disco.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+
+          <!-- Rango de fechas -->
+          <section style="padding: 16px 18px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #0369a1">Rango de fechas</h2>
+              <span class="mono" style="font-size: 11.5px; color: #64748b">92 días</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #475569; font-weight: 500">Desde
+                <input value="01/08/2026" readonly="readonly" style="height: 38px; padding: 0 12px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff; color: #1e293b; font-size: 13px">
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #475569; font-weight: 500">Hasta
+                <input value="31/10/2026" readonly="readonly" style="height: 38px; padding: 0 12px; border-radius: 4px; border: 2px solid #0284c7; background: #ffffff; color: #1e293b; font-size: 13px">
+              </label>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button style="height: 30px; padding: 0 12px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #475569; font-size: 12px; font-weight: 500">Últimos 30 días</button>
+              <button aria-pressed="true" style="height: 30px; padding: 0 12px; border-radius: 4px; border: 1px solid #0284c7; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 600">Último trimestre</button>
+              <button style="height: 30px; padding: 0 12px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #475569; font-size: 12px; font-weight: 500">Este año</button>
+            </div>
+          </section>
+
+          <!-- Destino -->
+          <section style="padding: 16px 18px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #0369a1">Carpeta de destino</h2>
+            <div style="display: flex; gap: 8px">
+              <label style="flex: 1; min-width: 0; display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Carpeta de destino</span>
+                <input class="mono" value="C:\Users\demo\Descargas\adjuntos_q3" readonly="readonly" style="flex: 1; min-width: 0; height: 38px; padding: 0 12px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff; color: #1e293b; font-size: 12px">
+              </label>
+              <button style="height: 38px; padding: 0 14px; border-radius: 4px; border: 2px solid #0369a1; background: transparent; color: #0369a1; font-size: 12px; font-weight: 600; text-transform: uppercase">Elegir</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-size: 12px; color: #475569; font-weight: 500">Organizar</span>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px"><input type="radio" name="org" style="width: 16px; height: 16px; accent-color: #0369a1">Plana</label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px"><input type="radio" name="org" checked="checked" style="width: 16px; height: 16px; accent-color: #0369a1">Por mes</label>
+              <span class="mono" style="font-size: 11px; color: #64748b">2026-08\ 2026-09\ …</span>
+            </div>
+          </section>
+
+          <!-- Filtros -->
+          <section style="grid-column: span 2; padding: 16px 18px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #0369a1">Filtros</h2>
+              <span style="font-size: 12px; color: #64748b">opcionales · vacío = todos</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 14px; align-items: end">
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #475569; font-weight: 500">El asunto contiene
+                <input value="factura" readonly="readonly" style="height: 38px; padding: 0 12px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff; color: #1e293b; font-size: 13px">
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #475569; font-weight: 500">El remitente contiene
+                <input value="" placeholder="ej. @proveedor.com" readonly="readonly" style="height: 38px; padding: 0 12px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff; color: #1e293b; font-size: 13px">
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 5px">
+                <span style="font-size: 12px; color: #475569; font-weight: 500">Extensiones</span>
+                <div style="height: 38px; display: flex; align-items: center; gap: 6px; padding: 0 6px; border-radius: 4px; border: 2px solid #cbd5e1; background: #ffffff">
+                  <span class="mono" style="height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 3px; background: #e0f2fe; color: #075985; font-size: 11.5px">.pdf</span>
+                  <span class="mono" style="height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 3px; background: #e0f2fe; color: #075985; font-size: 11.5px">.xlsx</span>
+                  <span class="mono" style="height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 3px; background: #e0f2fe; color: #075985; font-size: 11.5px">.xml</span>
+                  <span style="font-size: 12px; color: #64748b; padding-left: 4px">+ agregar</span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 28px">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0369a1">Omitir imágenes inline (firmas, logos)</label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px"><input type="checkbox" style="width: 18px; height: 18px; accent-color: #0369a1">Incluir subcarpetas</label>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Barra de acción -->
+      <div style="height: 72px; flex: none; margin-top: 18px; padding: 0 32px; display: flex; align-items: center; gap: 14px; border-top: 1px solid #e2e8f0; background: #ffffff">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 13px"><span class="mono" style="color: #0369a1; font-weight: 500">312</span> correos en rango · <span class="mono">~640</span> adjuntos estimados</span>
+          <span style="font-size: 12px; color: #64748b">El equipo no entrará en suspensión mientras dure la descarga.</span>
+        </div>
+        <div style="flex: 1"></div>
+        <button style="height: 42px; padding: 0 18px; border-radius: 4px; border: 2px solid #0369a1; background: transparent; color: #0369a1; font-size: 13px; font-weight: 600; text-transform: uppercase">Vista previa</button>
+        <button style="height: 42px; padding: 0 22px; border-radius: 4px; border: 2px solid {{primary}}; background: {{primary}}; color: #ffffff; font-size: 13px; font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="m7 10 5 5 5-5"></path><path d="M5 20h14"></path></svg>
+          Iniciar descarga
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0369a1","options":["#0369a1","#0284c7","#16a085"]},"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { primary: this.props.primary ?? '#0369a1' };
+  }
+}
+</script>
+</body>
+</html>
