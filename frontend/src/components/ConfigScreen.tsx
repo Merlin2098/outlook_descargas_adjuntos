@@ -191,7 +191,7 @@ export function ConfigScreen({form, onChange, onStarted}: Props) {
               ? <span className="field-error" role="alert">{startError}</span>
               : selectedCount !== null
                 ? <span><span className="mono strong-number">{formatInt(selectedCount)}</span> {es.config.footer(selectedCount, form.includeSubfolders)}</span>
-                : <span className="hint">{invalid ?? ''}</span>}
+                : <span className="hint">{invalid ?? form.folder?.path ?? ''}</span>}
             {!startError && selectedCount !== null && invalid && <span className="hint">{invalid}</span>}
           </div>
           <div className="spacer"/>
