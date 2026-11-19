@@ -206,7 +206,7 @@ la sección "Deferred minors" del cierre del Plan 3 (M1–M8).
 **Archivos:**
 - Modificar: lo que la auditoría encuentre (por ejemplo, `docs/diagnostico-legacy.md`)
 
-- [ ] **Paso 1:** sobre el árbol actual (`git grep -n -i`), buscar: el dominio y el nombre de la empresa original, `ext.`, `@` seguido de dominios que no sean `example`/`example.com`/`anthropic.com`/`localhost.invalid`, `C:\\Users\\`, `C:/Users/`, `AppData`, `Temp\\claude`, `scratchpad`, `Ricardo`, y nombres de personas o clientes en fixtures. También binarios versionados (`git ls-files | grep -iE '\.(exe|dll|xlsx|pst|msg)$'`).
+- [ ] **Paso 1:** sobre el árbol actual (`git grep -n -i`), buscar: el dominio y el nombre de la empresa original, `ext.`, `@` seguido de dominios que no sean `example`/`example.com`/`anthropic.com`/`localhost.invalid`, `C:\\Users\\`, `C:/Users/`, `AppData`, `Temp\\claude`, `scratchpad`, el nombre de pila del autor, y nombres de personas o clientes en fixtures. También binarios versionados (`git ls-files | grep -iE '\.(exe|dll|xlsx|pst|msg)$'`).
 - [ ] **Paso 2:** `docs/diagnostico-legacy.md`: mantener el análisis técnico, quitar el contexto de negocio interno si identifica a la organización (dejar "control documental interno" genérico) y revisar que no queden nombres. `CLAUDE.md` y `AGENTS.md` se publican tal cual (son parte de la historia del proyecto); revisar que no tengan datos personales.
 - [ ] **Paso 3:** registrar en el ledger cada hallazgo y su corrección; los que dependan del historial (el `.exe` y el autor de los commits) quedan para la Tarea 8.
 - [ ] **Paso 4:** commit `docs: limpieza para la publicación`.
