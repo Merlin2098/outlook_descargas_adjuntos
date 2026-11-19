@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	ole "github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
@@ -61,16 +62,27 @@ func New(o Options) (*Source, error) {
 // Name implementa source.MailSource.
 func (s *Source) Name() string { return "outlook" }
 
-// Close libera Outlook y termina el STA. Es idempotente.
+// closeTimeout limita cuánto espera Close a que el STA quede libre (variable para los tests).
+var closeTimeout = 2 * time.Second
+
+// Close libera Outlook y termina el STA. Es idempotente. Si Outlook no responde (el STA sigue
+// ocupado en una llamada COM, por ejemplo con un diálogo modal abierto), no bloquea el cierre de
+// la app: abandona el STA, que termina solo cuando esa llamada vuelva o el proceso salga.
 func (s *Source) Close() error {
-	err := s.sta.do(context.Background(), func() error {
+	ctx, cancel := context.WithTimeout(context.Background(), closeTimeout)
+	defer cancel()
+	err := s.sta.do(ctx, func() error {
 		s.disconnect()
 		return nil
 	})
-	s.sta.close()
-	if errors.Is(err, errSTAClosed) {
+	switch {
+	case errors.Is(err, errSTAClosed):
 		return nil
+	case ctx.Err() != nil:
+		s.sta.abandon()
+		return fmt.Errorf("Outlook no respondió al cerrar la conexión: %w", ctx.Err()) //nolint:staticcheck // texto visible
 	}
+	s.sta.close()
 	return err
 }
 

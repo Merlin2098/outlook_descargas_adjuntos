@@ -95,8 +95,13 @@ func (s *sta) do(ctx context.Context, fn func() error) error {
 
 // close termina el goroutine y libera COM en su hilo. Es idempotente.
 func (s *sta) close() {
-	s.once.Do(func() { close(s.quit) })
+	s.abandon()
 	<-s.closed
+}
+
+// abandon pide terminar sin esperar: el goroutine sale cuando termine la llamada en curso.
+func (s *sta) abandon() {
+	s.once.Do(func() { close(s.quit) })
 }
 
 // stream corre produce en el STA y entrega cada item al goroutine que llama, que corre fn.
