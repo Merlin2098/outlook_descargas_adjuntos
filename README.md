@@ -4,6 +4,8 @@ App de escritorio para Windows que descarga en bloque los adjuntos de una carpet
 con progreso en vivo, cancelación y un reporte Excel de lo que pasó con cada correo. Hecha con
 **Go + Wails v2 + React (TypeScript)**.
 
+[![CI](https://github.com/Merlin2098/outlook_descargas_adjuntos/actions/workflows/ci.yml/badge.svg)](https://github.com/Merlin2098/outlook_descargas_adjuntos/actions/workflows/ci.yml)
+
 ![Pantalla de configuración en modo demo](docs/img/configurar.png)
 
 ## Qué hace
@@ -25,7 +27,7 @@ con progreso en vivo, cancelación y un reporte Excel de lo que pasó con cada c
 
 Requisitos: Windows 10 u 11 con WebView2 (viene con Windows 11 y con Edge).
 
-- **Con la release:** descarga `outlook_descargas_adjuntos.exe` de la página de Releases y ejecútalo con
+- **Con la release:** descarga `outlook_descargas_adjuntos.exe` de la [página de Releases](https://github.com/Merlin2098/outlook_descargas_adjuntos/releases) y ejecútalo con
   `outlook_descargas_adjuntos.exe --demo`. El ejecutable no está firmado: SmartScreen puede pedirte confirmar
   ("Más información" → "Ejecutar de todas formas").
 - **Desde el código:** con Go 1.26+, Node 24 y el CLI de Wails v2.17.1:

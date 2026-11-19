@@ -7,13 +7,14 @@
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Ricardo",
+    "email": "218005242+Merlin2098@users.noreply.github.com"
   },
   "info": {
     "companyName": "",
     "productName": "outlook_descargas_adjuntos",
     "productVersion": "0.1.0",
-    "comments": "Descarga en bloque los adjuntos de una carpeta de Outlook Classic"
+    "comments": "Descarga en bloque los adjuntos de una carpeta de Outlook Classic",
+    "copyright": "© 2026 Ricardo"
   }
 }
