@@ -39,7 +39,7 @@ sin grabarla y sin publicar ningún resultado:
 
 ## 3. Guion del video (60–90 s, 1280×720)
 
-1. Arranque de la app (tema oscuro), con la etiqueta de la versión visible.
+1. Arranque de la app en tema oscuro (selector sol/luna de la barra de título), con la etiqueta de la versión visible.
 2. Explorar Outlook: abrir el árbol de cuentas y carpetas (carga asíncrona) y elegir la carpeta demo.
 3. Configurar: rango de fechas, filtro por extensiones (`pdf, xlsx`), organización por mes.
 4. Iniciar: progreso por fase, contador de correos y adjuntos, registro de actividad en pantalla.
@@ -66,6 +66,6 @@ Herramientas de grabación: OBS o la Xbox Game Bar. Exportar el MP4 para el READ
 | --- | --- | --- |
 | D1 | Idioma de la UI y del README | ✅ **Español** (2026-11-12) |
 | D2 | Video con Outlook real o con el modo demo | ✅ **Modo demo**; Outlook real solo se valida localmente (2026-11-12) |
-| D3 | Formato del reporte | Abierta. Recomendación: solo Excel; CSV como opción secundaria |
+| D3 | Formato del reporte | ✅ **Solo Excel** (hojas Resumen, Adjuntos y Omitidos) |
 | D4 | Nombre público del proyecto | ✅ **`outlook_descargas_adjuntos`** (2026-11-12) |
 | D5 | Benchmark legacy vs. rewrite | Abierta. Recomendación: medir sobre una carpeta real durante la validación local y publicar solo las cifras |
