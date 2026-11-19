@@ -8,3 +8,4 @@ _scaffold/
 *.log
 .superpowers/
 .tools/
+.playwright-mcp/

@@ -6,6 +6,20 @@ export const es = {
     minimize: 'Minimizar',
     maximize: 'Maximizar',
     close: 'Cerrar',
+    confirmClose: {
+      title: 'Hay una descarga en curso',
+      message: 'Si sales ahora se cancela la descarga. Los archivos ya guardados se conservan y se escribe el reporte parcial.',
+      confirm: 'Cancelar y salir',
+      cancel: 'Seguir descargando',
+    },
+  },
+  progress: {
+    phaseShort: {
+      connecting: 'conectando',
+      scanning: 'escaneando',
+      downloading: 'descargando',
+      reporting: 'generando reporte',
+    },
   },
   config: {
     errors: {
