@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"time"
 
 	"outlook_descargas_adjuntos/internal/domain"
+	"outlook_descargas_adjuntos/internal/outlook"
 	"outlook_descargas_adjuntos/internal/source"
 	"outlook_descargas_adjuntos/internal/source/demo"
 )
@@ -75,9 +75,6 @@ func (d JobRequestDTO) ToDomain() (domain.JobRequest, error) {
 	}, nil
 }
 
-// errNoOutlook se devuelve mientras no exista el adaptador COM (Plan 3).
-var errNoOutlook = errors.New("La fuente Outlook llega en el Plan 3; ejecute con --demo") //nolint:staticcheck // texto visible
-
 // Latencia simulada del modo demo, pensada para que el progreso se vea en el video.
 const (
 	demoScanDelay = 10 * time.Millisecond
@@ -91,5 +88,5 @@ func selectSource(args []string) (source.MailSource, error) {
 		return demo.New(demo.DefaultFixture(time.Now(), demoSeed),
 			demo.Options{ScanDelay: demoScanDelay, SaveDelay: demoSaveDelay}), nil
 	}
-	return nil, errNoOutlook
+	return outlook.New(outlook.Options{})
 }

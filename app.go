@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"io"
 	"log/slog"
 	"os"
 	"sync"
@@ -127,6 +128,11 @@ func (a *App) shutdown(context.Context) {
 	a.jobs.CancelActive()
 	if !a.jobs.Wait(shutdownWait) {
 		a.log.Warn("el job no terminó a tiempo al cerrar la app")
+	}
+	if c, ok := a.src.(io.Closer); ok {
+		if err := c.Close(); err != nil {
+			a.log.Warn("no se pudo cerrar la fuente de correos", "error", err)
+		}
 	}
 }
 

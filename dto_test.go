@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"reflect"
 	"strings"
 	"testing"
@@ -46,7 +47,15 @@ func TestSelectSource(t *testing.T) {
 	if err != nil || src.Name() != "demo" {
 		t.Fatalf("con --demo: %v", err)
 	}
-	if _, err := selectSource([]string{"app"}); err == nil {
-		t.Fatal("sin --demo debería fallar hasta el Plan 3")
+	src, err = selectSource([]string{"app"})
+	if err != nil || src.Name() != "outlook" {
+		t.Fatalf("sin --demo: %v", err)
+	}
+	c, ok := src.(io.Closer)
+	if !ok {
+		t.Fatal("la fuente Outlook no implementa io.Closer")
+	}
+	if err := c.Close(); err != nil {
+		t.Fatal(err)
 	}
 }
