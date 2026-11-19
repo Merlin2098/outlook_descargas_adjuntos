@@ -27,18 +27,27 @@ const (
 
 func isMailClass(class int) bool { return class == olMail }
 
-// oleEpoch es el día 0 de las fechas OLE Automation.
-var oleEpoch = time.Date(1899, 12, 30, 0, 0, 0, 0, time.Local)
+// oleDateToLocal convierte una fecha OLE (días desde 1899-12-30 + fracción del día, como hora de
+// pared local) a time.Local, con precisión de milisegundos. go-ole devuelve esa hora etiquetada como
+// UTC y sin milisegundos, por eso no se usa VARIANT.Value().
+func oleDateToLocal(days float64) time.Time { return oleDateIn(days, time.Local) }
 
-// oleDateToLocal convierte una fecha OLE (días desde 1899-12-30, hora de pared local) a time.Local,
-// con precisión de milisegundos. Se suman días de calendario y luego la hora, para que un cambio
-// de horario no desplace el día. go-ole devuelve esa hora etiquetada como UTC y sin milisegundos.
-func oleDateToLocal(days float64) time.Time {
+// oleDateIn es oleDateToLocal con la zona como parámetro (para probar cambios de horario).
+// El día se calcula en UTC (sin horarios de verano) y la hora se arma como hora de reloj con
+// time.Date, así un día de cambio de horario no desplaza ni la hora ni el día.
+func oleDateIn(days float64, loc *time.Location) time.Time {
 	whole := math.Floor(days)
-	frac := days - whole
-	d := oleEpoch.AddDate(0, 0, int(whole))
-	ms := math.Round(frac * 24 * 60 * 60 * 1000)
-	return time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local).Add(time.Duration(ms) * time.Millisecond)
+	ms := int64(math.Round((days - whole) * 24 * 60 * 60 * 1000))
+	if ms >= 24*60*60*1000 { // el redondeo llegó a medianoche del día siguiente
+		whole++
+		ms = 0
+	}
+	d := time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC).AddDate(0, 0, int(whole))
+	h := ms / 3_600_000
+	mi := ms % 3_600_000 / 60_000
+	sec := ms % 60_000 / 1000
+	ns := ms % 1000 * int64(time.Millisecond)
+	return time.Date(d.Year(), d.Month(), d.Day(), int(h), int(mi), int(sec), int(ns), loc)
 }
 
 // classifyAttachment decide la naturaleza de un adjunto. Un adjunto por valor es inline si está

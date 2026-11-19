@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	_ "time/tzdata"
 
 	"outlook_descargas_adjuntos/internal/domain"
 )
@@ -109,6 +110,38 @@ func TestIsMailClass(t *testing.T) {
 	for class, want := range map[int]bool{43: true, 26: false, 46: false, 53: false} {
 		if isMailClass(class) != want {
 			t.Errorf("isMailClass(%d) != %v", class, want)
+		}
+	}
+}
+
+// oleDays arma la fecha OLE de una hora de pared (días desde 1899-12-30 + fracción del día).
+func oleDays(y int, m time.Month, d, h, mi int) float64 {
+	days := time.Date(y, m, d, 0, 0, 0, 0, time.UTC).Sub(time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC)).Hours() / 24
+	return days + (float64(h)*60+float64(mi))/(24*60)
+}
+
+func TestOleDateDST(t *testing.T) {
+	cases := []struct {
+		zone         string
+		y            int
+		m            time.Month
+		d, h, mi     int
+		wantD, wantH int
+	}{
+		{"America/New_York", 2026, time.March, 8, 10, 30, 8, 10},
+		{"America/New_York", 2026, time.March, 8, 23, 30, 8, 23},
+		{"Europe/Madrid", 2026, time.March, 29, 23, 30, 29, 23},
+		{"America/New_York", 2026, time.November, 1, 23, 30, 1, 23},
+		{"America/Santiago", 2026, time.September, 6, 12, 0, 6, 12}, // allí la medianoche no existe ese día
+	}
+	for _, c := range cases {
+		loc, err := time.LoadLocation(c.zone)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := oleDateIn(oleDays(c.y, c.m, c.d, c.h, c.mi), loc)
+		if got.Day() != c.wantD || got.Hour() != c.wantH || got.Minute() != c.mi || got.Location() != loc {
+			t.Errorf("%s %d-%02d-%02d %02d:%02d → %v", c.zone, c.y, c.m, c.d, c.h, c.mi, got)
 		}
 	}
 }
