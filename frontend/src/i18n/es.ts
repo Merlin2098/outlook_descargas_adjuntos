@@ -14,4 +14,11 @@ export const es = {
       badRange: 'La fecha de inicio es posterior a la fecha fin',
     },
   },
+  summary: {
+    title: {
+      done: 'Descarga completada',
+      cancelled: 'Descarga cancelada',
+      error: 'La descarga terminó con un error',
+    },
+  },
 } as const
