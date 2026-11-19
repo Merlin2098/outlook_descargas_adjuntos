@@ -7,6 +7,8 @@ import {main} from '../models';
 
 export function CancelJob(arg1:string):Promise<void>;
 
+export function ConfirmClose():Promise<void>;
+
 export function GetConfig():Promise<config.Config>;
 
 export function GetJobStatus():Promise<jobs.Status>;

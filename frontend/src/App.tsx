@@ -54,7 +54,7 @@ function App() {
 
   return (
     <div className="app">
-      <TitleBar status={status} busy={busy} onCancelJob={cancel}/>
+      <TitleBar status={status} busy={busy}/>
       <div className="app-body">
         {/* Configurar queda montada (oculta) para conservar el árbol y el formulario al volver. */}
         <div className="screen" hidden={job.status !== 'idle'}>

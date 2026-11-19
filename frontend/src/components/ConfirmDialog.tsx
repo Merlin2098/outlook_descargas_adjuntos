@@ -12,12 +12,20 @@ interface Props {
 /** Diálogo modal simple; Escape cancela. */
 export function ConfirmDialog({title, message, confirmLabel, cancelLabel, onConfirm, onCancel}: Props) {
   const cancelRef = useRef<HTMLButtonElement>(null)
+  // onCancel cambia en cada render del padre (llegan ~10 eventos de progreso por segundo):
+  // se lee desde una ref para no repetir el efecto ni robar el foco.
+  const onCancelRef = useRef(onCancel)
+  onCancelRef.current = onCancel
+
   useEffect(() => {
     cancelRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancelRef.current()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onCancel])
+  }, [])
+
   return (
     <div className="dialog-backdrop" role="presentation">
       <div className="dialog card" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title">

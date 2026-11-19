@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react'
-import {SourceInfo} from '../../wailsjs/go/main/App'
+import {ConfirmClose, SourceInfo} from '../../wailsjs/go/main/App'
 import {main} from '../../wailsjs/go/models'
-import {Quit, WindowMinimise, WindowToggleMaximise} from '../../wailsjs/runtime/runtime'
+import {EventsOn, Quit, WindowMinimise, WindowToggleMaximise} from '../../wailsjs/runtime/runtime'
 import {es} from '../i18n/es'
 import {ConfirmDialog} from './ConfirmDialog'
 import {Icon} from './Icon'
@@ -11,17 +11,19 @@ interface Props {
   status?: string
   /** Hay un job en curso: cerrar pide confirmación. */
   busy: boolean
-  onCancelJob: () => Promise<void>
 }
 
 /** Barra de título propia de la ventana sin marco. Se arrastra desde cualquier punto que no sea un botón. */
-export function TitleBar({status, busy, onCancelJob}: Props) {
+export function TitleBar({status, busy}: Props) {
   const [info, setInfo] = useState<main.SourceInfo | null>(null)
   const [confirming, setConfirming] = useState(false)
 
   useEffect(() => {
     SourceInfo().then(setInfo).catch(() => setInfo(null))
   }, [])
+
+  // Alt+F4 o cerrar desde la barra de tareas con un job activo: el backend lo impide y avisa aquí.
+  useEffect(() => EventsOn('app:closeRequested', () => setConfirming(true)), [])
 
   const close = () => (busy ? setConfirming(true) : Quit())
 
@@ -45,9 +47,10 @@ export function TitleBar({status, busy, onCancelJob}: Props) {
           confirmLabel={es.titleBar.confirmClose.confirm}
           cancelLabel={es.titleBar.confirmClose.cancel}
           onCancel={() => setConfirming(false)}
-          onConfirm={async () => {
-            await onCancelJob()
-            Quit()
+          onConfirm={() => {
+            setConfirming(false)
+            // Cancela el job y cierra; el backend espera a que escriba el reporte parcial.
+            ConfirmClose().catch(() => Quit())
           }}
         />
       )}

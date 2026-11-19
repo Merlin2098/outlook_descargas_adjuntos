@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -123,5 +124,65 @@ func TestNotifyTerminal(t *testing.T) {
 		if n.beeps != c.want || n.flashes != c.want {
 			t.Errorf("%s: beeps %d flashes %d, want %d", c.event, n.beeps, n.flashes, c.want)
 		}
+	}
+}
+
+type recEmitter struct {
+	mu     sync.Mutex
+	events []string
+}
+
+func (r *recEmitter) Emit(name string, _ any) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.events = append(r.events, name)
+}
+
+func (r *recEmitter) has(name string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, e := range r.events {
+		if e == name {
+			return true
+		}
+	}
+	return false
+}
+
+func TestBeforeCloseIdle(t *testing.T) {
+	a, _ := testApp(t)
+	rec := &recEmitter{}
+	a.emit = rec
+	if a.beforeClose(context.Background()) {
+		t.Fatal("beforeClose sin job impidió cerrar")
+	}
+	if rec.has(EventCloseRequested) {
+		t.Fatal("se emitió app:closeRequested sin job")
+	}
+}
+
+func TestBeforeCloseRunning(t *testing.T) {
+	src := demo.New(demo.DefaultFixture(time.Now(), 42), demo.Options{SaveDelay: 20 * time.Millisecond})
+	a := NewApp(src, slog.New(slog.NewTextHandler(io.Discard, nil)), t.TempDir(), config.Default())
+	rec := &recEmitter{}
+	a.emit = rec
+	if _, err := a.StartJob(facturasDTO(t, a)); err != nil {
+		t.Fatal(err)
+	}
+	if !a.beforeClose(context.Background()) {
+		t.Fatal("beforeClose con un job activo no impidió cerrar")
+	}
+	if !rec.has(EventCloseRequested) {
+		t.Fatal("no se emitió app:closeRequested")
+	}
+	a.ConfirmClose()
+	if a.beforeClose(context.Background()) {
+		t.Fatal("tras ConfirmClose, beforeClose sigue impidiendo cerrar")
+	}
+	if !a.jobs.Wait(10 * time.Second) {
+		t.Fatal("el job no terminó")
+	}
+	if last := a.jobs.Status().Last; last == nil || last.Outcome != jobs.OutcomeCancelled {
+		t.Fatalf("Last = %+v, want cancelado", last)
 	}
 }

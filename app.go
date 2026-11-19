@@ -29,9 +29,15 @@ type App struct {
 	log       *slog.Logger
 	configDir string
 
-	mu  sync.Mutex // protege cfg: Wails llama a los bindings desde varios goroutines
-	cfg config.Config
+	emit jobs.Emitter // eventos de la app hacia la UI (fuera de los del job)
+
+	mu      sync.Mutex // protege cfg y closeOK: Wails llama a los bindings desde varios goroutines
+	cfg     config.Config
+	closeOK bool
 }
+
+// EventCloseRequested pide a la UI confirmar el cierre porque hay una descarga en curso.
+const EventCloseRequested = "app:closeRequested"
 
 // wailsEmitter publica los eventos del gestor de jobs en el runtime de Wails.
 type wailsEmitter struct{ app *App }
@@ -75,6 +81,7 @@ func notifyTerminal(event string, n notifier) {
 // NewApp crea la app. src puede ser nil si no hay fuente disponible.
 func NewApp(src source.MailSource, log *slog.Logger, configDir string, cfg config.Config) *App {
 	a := &App{src: src, log: log, configDir: configDir, cfg: cfg}
+	a.emit = wailsEmitter{a}
 	if src != nil {
 		a.jobs = jobs.NewManagerWith(src, wailsEmitter{a}, eventInterval, log, jobs.Options{Begin: winapi.KeepAwake})
 	}
@@ -82,6 +89,33 @@ func NewApp(src source.MailSource, log *slog.Logger, configDir string, cfg confi
 }
 
 func (a *App) startup(ctx context.Context) { a.ctx = ctx }
+
+// beforeClose (OnBeforeClose de Wails) impide cerrar con una descarga en curso y pide a la UI
+// que lo confirme. Cubre Alt+F4 y el cierre desde la barra de tareas.
+func (a *App) beforeClose(context.Context) (prevent bool) {
+	a.mu.Lock()
+	ok := a.closeOK
+	a.mu.Unlock()
+	if ok || a.jobs == nil || !a.jobs.Running() {
+		return false
+	}
+	a.emit.Emit(EventCloseRequested, nil)
+	return true
+}
+
+// ConfirmClose lo llama la UI cuando el usuario confirma salir: cancela la descarga y cierra.
+// shutdown espera a que el job escriba su reporte parcial.
+func (a *App) ConfirmClose() {
+	a.mu.Lock()
+	a.closeOK = true
+	a.mu.Unlock()
+	if a.jobs != nil {
+		a.jobs.CancelActive()
+	}
+	if a.ctx != nil {
+		runtime.Quit(a.ctx)
+	}
+}
 
 // shutdownWait es cuánto se espera, al cerrar, a que un job cancelado escriba su reporte parcial.
 const shutdownWait = 5 * time.Second

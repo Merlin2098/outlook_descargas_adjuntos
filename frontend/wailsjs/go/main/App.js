@@ -6,6 +6,10 @@ export function CancelJob(arg1) {
   return window['go']['main']['App']['CancelJob'](arg1);
 }
 
+export function ConfirmClose() {
+  return window['go']['main']['App']['ConfirmClose']();
+}
+
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
