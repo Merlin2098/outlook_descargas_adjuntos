@@ -1,0 +1,25 @@
+/* Tokens del diseño aprobado (tema claro del original). Ver AGENTS.md, "Referencia visual". */
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-alt: #F1F5F9;
+  --border: #CBD5E1;
+  --border-soft: #E2E8F0;
+  --text: #1E293B;
+  --text-2: #475569;
+  --text-3: #64748B;
+  --primary: #0284C7;
+  --primary-strong: #0369A1;
+  --accent: #8B5CF6;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #06B6D4;
+  --success-text: #047857;
+  --warning-text: #B45309;
+  --error-text: #DC2626;
+  --radius-control: 4px;
+  --radius-card: 8px;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, monospace;
+}
