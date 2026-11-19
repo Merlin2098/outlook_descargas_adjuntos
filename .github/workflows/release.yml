@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend (tests y build)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: go test
+        run: go test ./...
+
+      - name: Wails CLI v2.17.1
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.1
+
+      - name: Compilar
+        shell: bash
+        run: wails build -clean -trimpath -ldflags "-X main.appVersion=${GITHUB_REF_NAME#v}"
+
+      - name: Publicar la release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notas.md <<'NOTAS'
+          El ejecutable no está firmado: Windows SmartScreen puede mostrar "Windows protegió su PC".
+          Para ejecutarlo, elige "Más información" → "Ejecutar de todas formas".
+
+          Requiere Windows 10/11 con WebView2. Para probarlo sin Outlook: `outlook_descargas_adjuntos.exe --demo`.
+          NOTAS
+          gh release create "$GITHUB_REF_NAME" build/bin/outlook_descargas_adjuntos.exe \
+            --title "$GITHUB_REF_NAME" --notes-file notas.md --generate-notes
