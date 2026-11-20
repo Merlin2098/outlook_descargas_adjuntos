@@ -13,7 +13,7 @@
   "info": {
     "companyName": "",
     "productName": "outlook_descargas_adjuntos",
-    "productVersion": "0.1.0",
+    "productVersion": "0.2.0",
     "comments": "Descarga en bloque los adjuntos de una carpeta de Outlook Classic",
     "copyright": "© 2026 Ricardo"
   }

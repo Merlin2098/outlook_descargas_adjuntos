@@ -101,7 +101,7 @@ func TestStartJobSavesPreferences(t *testing.T) {
 
 func TestSourceInfoVersion(t *testing.T) {
 	a, _ := testApp(t)
-	if v := a.SourceInfo().Version; v != "0.1.0" {
+	if v := a.SourceInfo().Version; v != "0.2.0" {
 		t.Fatalf("Version = %q", v)
 	}
 }

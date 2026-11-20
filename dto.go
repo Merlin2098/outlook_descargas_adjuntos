@@ -15,7 +15,7 @@ const dateLayout = "2006-01-02"
 
 // appVersion es la versión que muestra la barra de título. La release la sobrescribe con
 // -ldflags "-X main.appVersion=X.Y.Z" a partir del tag.
-var appVersion = "0.1.0"
+var appVersion = "0.2.0"
 
 // JobRequestDTO es la solicitud tal como llega desde el frontend (fechas como texto).
 type JobRequestDTO struct {
