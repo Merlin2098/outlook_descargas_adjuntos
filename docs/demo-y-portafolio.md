@@ -47,7 +47,9 @@ sin grabarla y sin publicar ningún resultado:
 6. Fin: resumen, beep y parpadeo de la ventana, botón "Abrir carpeta". Mostrar los archivos en el Explorador y el Excel de la ejecución.
 7. Cierre: terminal con `go test ./...` en verde y el tamaño del binario.
 
-Herramientas de grabación: OBS o la Xbox Game Bar. Exportar el MP4 para el README y un GIF corto (≤ 10 MB) para la vista previa de GitHub.
+Grabación: automatizada con Playwright y montada con ffmpeg ([scripts/grabar-demo](../scripts/grabar-demo/README.md)).
+Resultado: [docs/img/demo.mp4](img/demo.mp4) (70 s) y [docs/img/demo.gif](img/demo.gif) (vista previa del README, menos de 10 MB).
+El Explorador y Excel no se graban (mostrarían el escritorio): sus datos aparecen en tarjetas generadas desde los archivos reales.
 
 ## 4. Repositorio público
 
