@@ -1,6 +1,7 @@
 package demo
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
@@ -136,11 +137,16 @@ func TestSaveAttachment(t *testing.T) {
 	if err := s.SaveAttachment(context.Background(), ok.EntryID, 1, dest); err != nil {
 		t.Fatal(err)
 	}
-	if st, err := os.Stat(dest); err != nil || st.Size() != ok.Attachments[0].Size {
-		t.Fatalf("tamaño guardado incorrecto: %v %v", st, err)
+	got, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := fileContent(ok, FixtureAttachment{FileName: ok.Attachments[0].FileName, Kind: domain.KindFile})
+	if err != nil || len(want) == 0 || !bytes.Equal(got, want) {
+		t.Fatalf("SaveAttachment no escribió el contenido generado (%d bytes, want %d): %v", len(got), len(want), err)
 	}
 
-	err := s.SaveAttachment(context.Background(), failing.EntryID, failIdx, filepath.Join(dir, "x.exe"))
+	err = s.SaveAttachment(context.Background(), failing.EntryID, failIdx, filepath.Join(dir, "x.exe"))
 	if err == nil || !strings.Contains(err.Error(), "Adjunto bloqueado por Outlook") {
 		t.Fatalf("err = %v", err)
 	}

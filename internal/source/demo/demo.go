@@ -3,7 +3,6 @@
 package demo
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -127,7 +126,7 @@ func (s *Source) Scan(ctx context.Context, ref domain.FolderRef, fn func(source.
 	return nil
 }
 
-// SaveAttachment implementa source.MailSource. Escribe Size bytes deterministas.
+// SaveAttachment implementa source.MailSource. Escribe un archivo válido y determinista (ver fileContent).
 func (s *Source) SaveAttachment(ctx context.Context, mailEntryID string, index int, destPath string) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -143,8 +142,10 @@ func (s *Source) SaveAttachment(ctx context.Context, mailEntryID string, index i
 	if a.FailWith != "" {
 		return errors.New(a.FailWith)
 	}
-	pattern := []byte(fmt.Sprintf("demo:%s:%s\n", mailEntryID, a.FileName))
-	data := bytes.Repeat(pattern, int(a.Size)/len(pattern)+1)[:a.Size]
+	data, err := fileContent(it.Mail, a)
+	if err != nil {
+		return fmt.Errorf("generar adjunto demo %s: %w", a.FileName, err)
+	}
 	return os.WriteFile(destPath, data, 0o644)
 }
 
