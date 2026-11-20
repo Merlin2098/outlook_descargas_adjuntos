@@ -6,7 +6,7 @@ con progreso en vivo, cancelación y un reporte Excel de lo que pasó con cada c
 
 ![Demo de punta a punta en modo demo: elegir carpeta, configurar, descargar, cancelar, relanzar y revisar el resultado](docs/img/demo.gif)
 
-Video completo (70 s, 1280×720): [docs/img/demo.mp4](docs/img/demo.mp4). Se grabó en modo demo con datos ficticios,
+Video completo (85 s, 1280×720, incluye abrir los adjuntos descargados): [docs/img/demo.mp4](docs/img/demo.mp4). Se grabó en modo demo con datos ficticios,
 de forma automatizada y reproducible ([scripts/grabar-demo](scripts/grabar-demo/README.md)).
 
 ## Qué hace

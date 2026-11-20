@@ -7,8 +7,8 @@ El video de [docs/img/demo.mp4](../../docs/img/demo.mp4) y el GIF del README se 
 | --- | --- |
 | `comun.js` | Cursor visible con efecto al hacer clic, rótulos y el contexto de Playwright que graba a 1280×720 |
 | `escena-app.js` | Escena 1: la app de punta a punta (tema, árbol, configuración, descarga, cancelar, relanzar, resumen) |
-| `escena-tarjetas.js` | Escena 2: tarjetas finales con los datos reales de la descarga grabada |
-| `tarjetas/` | Programa Go que genera las tarjetas: archivos en disco, hojas del Excel (con excelize), `go test` y tamaño del binario |
+| `escena-tarjetas.js` | Escena 2: la carpeta de destino, la factura PDF descargada (en el visor del navegador), un estado de cuenta XLSX, el reporte y `go test` |
+| `tarjetas/` | Programa Go que genera las páginas de la escena 2 a partir de los archivos descargados: vista de la carpeta, vistas del XLSX (y del XML si se descargó), hojas del reporte, `go test` y tamaño del binario |
 | `armar.mjs` | Une `comun.js` con cada escena en una sola función ejecutable por Playwright MCP |
 | `montar.sh` | Une las escenas con ffmpeg y exporta `demo.mp4` y `demo.gif` |
 
@@ -40,6 +40,7 @@ Requisitos: Node, ffmpeg y Playwright MCP (la herramienta `browser_run_code` con
 
 6. Escena 2: navegar a `about:blank#tarjetas=<URL file:/// de .playwright-mcp/tarjetas>` y ejecutar
    `.playwright-mcp/escena-tarjetas.run.js`.
-7. Montaje: `scripts/grabar-demo/montar.sh <app.webm> <tarjetas.webm> docs/img`.
+7. Montaje: `scripts/grabar-demo/montar.sh <app.webm> <tarjetas.webm> docs/img` (recorta 5 s de cola de la escena 2;
+   se cambia con `RECORTE_FINAL`).
 
 El sonido y el parpadeo de la ventana al terminar son nativos y no se ven en el navegador: el video los menciona en un rótulo.

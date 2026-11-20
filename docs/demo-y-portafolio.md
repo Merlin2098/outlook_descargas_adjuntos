@@ -48,8 +48,9 @@ sin grabarla y sin publicar ningún resultado:
 7. Cierre: terminal con `go test ./...` en verde y el tamaño del binario.
 
 Grabación: automatizada con Playwright y montada con ffmpeg ([scripts/grabar-demo](../scripts/grabar-demo/README.md)).
-Resultado: [docs/img/demo.mp4](img/demo.mp4) (70 s) y [docs/img/demo.gif](img/demo.gif) (vista previa del README, menos de 10 MB).
-El Explorador y Excel no se graban (mostrarían el escritorio): sus datos aparecen en tarjetas generadas desde los archivos reales.
+Resultado: [docs/img/demo.mp4](img/demo.mp4) (85 s) y [docs/img/demo.gif](img/demo.gif) (vista previa del README, menos de 10 MB).
+El Explorador y Excel no se graban (mostrarían el escritorio): la carpeta de destino y el XLSX se muestran en vistas generadas
+desde los archivos reales, y la factura PDF descargada se abre en el visor de PDF del navegador.
 
 ## 4. Repositorio público
 

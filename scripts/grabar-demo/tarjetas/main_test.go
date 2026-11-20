@@ -64,3 +64,44 @@ func TestPickColumns(t *testing.T) {
 		}
 	}
 }
+
+func TestPickShowcase(t *testing.T) {
+	tree := Tree{Folders: []Folder{
+		{Name: "2026-10", Files: []File{{Name: "factura_F001-00090.pdf"}, {Name: "factura_F001-00090.xml"}}},
+		{Name: "2026-11", Files: []File{
+			{Name: "consulta_01.docx"},
+			{Name: "estado_cuenta_mayo_1.xlsx"},
+			{Name: "estado_cuenta_mayo.xlsx"},
+			{Name: "factura_F001-00120_1.pdf"},
+			{Name: "factura_F001-00120_1.xml"},
+			{Name: "factura_F001-00121.pdf"},
+			{Name: "factura_F001-00122.pdf"},
+			{Name: "factura_F001-00122.xml"},
+		}},
+	}}
+	s, err := pickShowcase(tree)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Showcase{Folder: "2026-11", PDF: "factura_F001-00122.pdf", XML: "factura_F001-00122.xml", XLSX: "estado_cuenta_mayo.xlsx"}
+	if s != want {
+		t.Fatalf("pickShowcase = %+v, want %+v", s, want)
+	}
+	// Con el filtro pdf, xlsx no hay XML: la factura se muestra igual, sin su XML.
+	solo := Tree{Folders: []Folder{{Name: "2026-11", Files: []File{{Name: "factura_F001-00130.pdf"}, {Name: "estado_cuenta_mayo.xlsx"}}}}}
+	if s, err := pickShowcase(solo); err != nil || s.PDF != "factura_F001-00130.pdf" || s.XML != "" {
+		t.Fatalf("sin XML: %+v, %v", s, err)
+	}
+	if _, err := pickShowcase(Tree{Folders: []Folder{{Name: "x"}}}); err == nil {
+		t.Fatal("sin factura ni estado de cuenta debería fallar")
+	}
+}
+
+func TestSpanishNumber(t *testing.T) {
+	cases := map[string]string{"1,980.52": "1.980,52", "175.10": "175,10", "10,394.82": "10.394,82", "F001-00263": "F001-00263", "09/10/2026": "09/10/2026"}
+	for in, want := range cases {
+		if got := spanishNumber(in); got != want {
+			t.Errorf("spanishNumber(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Monta el video demo a partir de las dos escenas grabadas por Playwright:
-#   scripts/grabar-demo/montar.sh <app.webm> <tarjetas.webm> <salida_dir>
+#   [RECORTE_FINAL=5] scripts/grabar-demo/montar.sh <app.webm> <tarjetas.webm> <salida_dir>
 # Genera <salida_dir>/demo.mp4 (H.264, 1280×720) y <salida_dir>/demo.gif (vista previa ≤ 10 MB).
 set -euo pipefail
 app="$1"; tarjetas="$2"; out="$3"
@@ -8,9 +8,13 @@ mkdir -p "$out"
 fade=0.6
 dur_app=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$app")
 offset=$(awk -v d="$dur_app" -v f="$fade" 'BEGIN{printf "%.2f", d-f}')
+# Playwright sigue grabando mientras cierra el contexto: se recorta esa cola fija de la escena 2.
+recorte=${RECORTE_FINAL:-5}
+dur_tarj=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$tarjetas")
+fin_tarj=$(awk -v d="$dur_tarj" -v r="$recorte" 'BEGIN{printf "%.2f", d-r}')
 
 # MP4: escena de la app + fundido + tarjetas. 30 fps constantes para que xfade no desincronice.
-ffmpeg -y -v error -i "$app" -i "$tarjetas" -filter_complex \
+ffmpeg -y -v error -i "$app" -t "$fin_tarj" -i "$tarjetas" -filter_complex \
   "[0:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[a];[1:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[b];[a][b]xfade=transition=fade:duration=${fade}:offset=${offset},format=yuv420p[v]" \
   -map "[v]" -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -preset slow -crf 24 -movflags +faststart -an "$out/demo.mp4"
 

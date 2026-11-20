@@ -1,6 +1,7 @@
-// Command tarjetas genera las tarjetas HTML del final del video demo a partir de datos reales:
-// los archivos que dejó la descarga en el destino, las hojas del reporte Excel, la salida de
-// `go test ./...` y el tamaño del binario. Ver scripts/grabar-demo/README.md.
+// Command tarjetas genera las páginas HTML del final del video demo a partir de datos reales: una vista
+// de la carpeta de destino con los archivos descargados, vistas de un XLSX y un XML descargados, las
+// hojas del reporte Excel, la salida de `go test ./...` y el tamaño del binario.
+// Ver scripts/grabar-demo/README.md.
 package main
 
 import (
@@ -52,10 +53,27 @@ func main() {
 	if err := os.MkdirAll(*out, 0o755); err != nil {
 		log.Fatal(err)
 	}
+	show, err := pickShowcase(tree)
+	if err != nil {
+		log.Fatal(err)
+	}
+	folder := filepath.Join(*dest, show.Folder)
+	xlsx, err := xlsxViewer(filepath.Join(folder, show.XLSX))
+	if err != nil {
+		log.Fatal(err)
+	}
 	pages := map[string]string{
-		"archivos.html": page(fontDir, filesCard(*dest, tree)),
-		"reporte.html":  page(fontDir, reportCard(tree.Report, sheets)),
-		"terminal.html": page(fontDir, terminalCard(string(testOut), filepath.Base(*exe), st.Size())),
+		"explorador.html": page(fontDir, explorerPage(*dest, tree, show)),
+		"ver-xlsx.html":   page(fontDir, viewerFrame(filepath.Join(folder, show.XLSX), "Estado de cuenta (XLSX)", xlsx)),
+		"reporte.html":    page(fontDir, reportCard(tree.Report, sheets)),
+		"terminal.html":   page(fontDir, terminalCard(string(testOut), filepath.Base(*exe), st.Size())),
+	}
+	if show.XML != "" {
+		xmlView, err := xmlViewer(filepath.Join(folder, show.XML))
+		if err != nil {
+			log.Fatal(err)
+		}
+		pages["ver-xml.html"] = page(fontDir, viewerFrame(filepath.Join(folder, show.XML), "Factura electrónica (XML)", xmlView))
 	}
 	for name, body := range pages {
 		if err := os.WriteFile(filepath.Join(*out, name), []byte(body), 0o644); err != nil {
@@ -163,32 +181,6 @@ func humanSize(n int64) string {
 
 func esc(s string) string { return html.EscapeString(s) }
 
-func filesCard(dest string, t Tree) string {
-	var b strings.Builder
-	total, bytes := 0, int64(0)
-	for _, f := range t.Folders {
-		total += len(f.Files)
-		bytes += f.Bytes
-	}
-	fmt.Fprintf(&b, `<div class="kicker">Lo que quedó en disco</div><h1>%s</h1>`, esc(dest))
-	fmt.Fprintf(&b, `<p class="sub">%d archivos · %s · organizados por mes</p><div class="cols"><div class="panel tree">`, total, humanSize(bytes))
-	for i, f := range t.Folders {
-		fmt.Fprintf(&b, `<div class="row dir"><span>📁 %s\</span><span class="mono dim">%d archivos · %s</span></div>`, esc(f.Name), len(f.Files), humanSize(f.Bytes))
-		if i == len(t.Folders)-1 {
-			for j, file := range f.Files {
-				if j == 7 {
-					fmt.Fprintf(&b, `<div class="row file dim">… y %d más</div>`, len(f.Files)-7)
-					break
-				}
-				fmt.Fprintf(&b, `<div class="row file"><span class="mono">%s</span><span class="mono dim">%s</span></div>`, esc(file.Name), humanSize(file.Bytes))
-			}
-		}
-	}
-	fmt.Fprintf(&b, `<div class="row dir report"><span>📊 %s</span><span class="mono dim">reporte de la ejecución</span></div>`, esc(t.Report))
-	b.WriteString(`</div><div class="notes"><p>Los nombres repetidos se resuelven con el sufijo <span class="mono">_N</span>: nunca se sobrescribe un archivo.</p><p>Los adjuntos inline (firmas, logos) se omitieron y quedan registrados en el reporte.</p></div></div>`)
-	return b.String()
-}
-
 // pickColumns se queda con las columnas cuyo encabezado empieza por cada prefijo, en ese orden.
 func pickColumns(rows [][]string, prefixes []string) [][]string {
 	if len(rows) == 0 {
@@ -291,9 +283,6 @@ h1{margin:0;font-size:34px;font-weight:700}
 .dim{color:#94A3B8}
 .cols{display:flex;gap:24px;flex:1;min-height:0}
 .panel{background:#1B2233;border:1px solid #2C3549;border-radius:8px;padding:16px 20px;min-width:0}
-.tree{flex:1.4}.notes{flex:1;color:#94A3B8;font-size:16px;line-height:1.6}
-.row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;font-size:16px}
-.dir{font-weight:600}.file{padding-left:28px;font-size:14px}.report{color:#7DD3FC;margin-top:8px;border-top:1px solid #2C3549;padding-top:12px}
 .tabs{display:flex;gap:10px}.tab{background:#252D42;border:1px solid #334155;border-radius:4px;padding:6px 12px;font-size:14px;font-weight:600}
 .sheet{flex:1;overflow:hidden}.sheet:first-of-type{flex:1.25}.sheet-name{color:#38BDF8;font-weight:600;margin-bottom:10px}
 table{border-collapse:collapse;font-size:12.5px;width:100%;table-layout:fixed}
