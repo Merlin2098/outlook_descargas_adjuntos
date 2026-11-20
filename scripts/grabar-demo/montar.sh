@@ -11,8 +11,8 @@ offset=$(awk -v d="$dur_app" -v f="$fade" 'BEGIN{printf "%.2f", d-f}')
 
 # MP4: escena de la app + fundido + tarjetas. 30 fps constantes para que xfade no desincronice.
 ffmpeg -y -v error -i "$app" -i "$tarjetas" -filter_complex \
-  "[0:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[a];[1:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[b];[a][b]xfade=transition=fade:duration=${fade}:offset=${offset}[v]" \
-  -map "[v]" -c:v libx264 -preset slow -crf 24 -movflags +faststart -an "$out/demo.mp4"
+  "[0:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[a];[1:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[b];[a][b]xfade=transition=fade:duration=${fade}:offset=${offset},format=yuv420p[v]" \
+  -map "[v]" -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -preset slow -crf 24 -movflags +faststart -an "$out/demo.mp4"
 
 # GIF: el mismo video a 1,5× de velocidad, 10 fps y 880 px, con paleta propia.
 ffmpeg -y -v error -i "$out/demo.mp4" -filter_complex \
